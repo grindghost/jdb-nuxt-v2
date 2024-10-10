@@ -302,7 +302,7 @@
       return;
     }
 
-    // Ping the API to check if it's live
+    // Ping the API to check if it's live...
     const apiIsLive = await store.PingApi();
     if (!apiIsLive) {
       store.loadingStatus = false;
