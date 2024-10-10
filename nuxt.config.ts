@@ -9,4 +9,15 @@ export default defineNuxtConfig({
     'quill/dist/quill.snow.css',
     '@/assets/global.css',  // Your global CSS file
   ],
+
+  nitro: {
+    routeRules: {
+      '/**': {
+        headers: {
+          'Content-Security-Policy': "frame-ancestors 'self' https://www.brioeducation.ca",
+        }
+      }
+    }
+  },
+
 })
