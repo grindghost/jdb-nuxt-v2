@@ -40,7 +40,10 @@ export default defineEventHandler(async (event) => {
           'ul', 'ol', 'li', // Lists (unordered and ordered, list items)
           'b', 'i', 'u', 'strike' // Basic formatting (bold, italic, underline, strikethrough)
         ],
-        allowedAttributes: {} // Disallow all attributes
+        allowedAttributes: {
+            '*': ['class'], // Allow 'class' attribute on all tags
+            'li': ['data-list'] // Allow 'data-list' attribute only on 'li' tags
+          }
       })
 
     // const encryptedAnswer = encryptContent(data)

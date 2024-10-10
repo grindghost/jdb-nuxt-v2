@@ -60,7 +60,10 @@ export default defineEventHandler(async (event) => {
               'ul', 'ol', 'li', // Lists
               'b', 'i', 'u', 'strike', // Text formatting
             ],
-            allowedAttributes: {} // Optionally allow specific attributes
+            allowedAttributes: {
+                '*': ['class'], // Allow 'class' attribute on all tags
+                'li': ['data-list'] // Allow 'data-list' attribute only on 'li' tags
+              }
           })
   
           return { data: sanitizedContent }
