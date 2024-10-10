@@ -20,7 +20,7 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    // Update the cookie if a new backpackId was created
+    // Update the cookie if a new backpackId was created...
     if (validBackpackId !== backpackId) {
       setCookie(event, 'backpackId', validBackpackId, {
         httpOnly: true,
