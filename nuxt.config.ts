@@ -9,9 +9,4 @@ export default defineNuxtConfig({
     'quill/dist/quill.snow.css',
     '@/assets/global.css',  // Your global CSS file
   ],
-  routeRules: {
-    // prerender index route by default
-    '/': { prerender: true },
-  },
-
 })
