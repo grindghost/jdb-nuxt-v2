@@ -12,7 +12,7 @@
 html {
     padding: 2px;  
     opacity: 0; /* Initially hidden */
-    animation: fadeIn 3s ease forwards; /* Apply fade-in animation */
+    animation: fadeIn 2s ease forwards; /* Apply fade-in animation */
 }
 
 @keyframes fadeIn {
