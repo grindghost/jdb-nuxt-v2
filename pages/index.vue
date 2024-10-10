@@ -191,7 +191,7 @@
                 position: absolute;
                 bottom: -24px;
                 z-index: 3;
-                left: -1px;
+                left: 3px;
               "
             />
             <img
