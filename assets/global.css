@@ -1,0 +1,296 @@
+/* Overpass */
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Inter:wght@100..900&family=Overpass:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Source+Sans+3:ital,wght@0,200..900;1,200..900&display=swap');
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Overpass';
+    cursor: pointer;
+  }
+
+  #app {
+    width: fit-content;
+    margin: 6px;
+    position: absolute;
+  }
+
+.theme-default {
+    /* --color-theme: #012038; */
+    /* --color-theme-light: #096edf; */
+    --color-theme-white: #fff;
+    /* --color-theme-accent: #1683ff; */
+  
+    /* --color-theme-button: #096edf; */
+    /* --color-theme-button-hover: #1750b3; */
+    --color-theme-button-disabled: #d1d7d8;
+    --color-theme-textarea-bg: #F8F9FA;
+
+  --color-theme-container-gradient: linear-gradient(0deg, rgba(228, 233, 234, 1) 65%, rgba(255,255,255,1) 100%);
+  --color-theme-overlays-gradient: linear-gradient(0deg, rgba(41, 40, 40, 0.85) 0%, rgba(0, 0, 0, 0.7) 70%, rgba(1, 1, 1, 0.59) 100%);
+}
+
+.theme-brio {
+    --color-theme: #012038;
+    --color-theme-light: #0755b1;
+    --color-theme-white: #fff;
+    --color-theme-accent: #0755b1;
+  
+    --color-theme-button: #0755b1;
+    --color-theme-button-hover: #0e67d6;
+    --color-theme-button-disabled: #d1d7d8;
+    --color-theme-textarea-bg: #F8F9FA;
+  
+    --color-theme-container-gradient: linear-gradient(0deg, rgba(228, 233, 234, 1) 65%, rgba(255,255,255,1) 100%);
+    --color-theme-overlays-gradient: linear-gradient(0deg, rgba(41, 40, 40, 0.85) 0%, rgba(0, 0, 0, 0.7) 70%, rgba(1, 1, 1, 0.59) 100%);
+}
+
+.theme-ul-yellow {
+    --color-theme: #ffc103;
+    --color-theme-light: #ffc103;
+    --color-theme-white: #fff;
+    --color-theme-accent: #ffc103;
+  
+    --color-theme-button: #ffc103;
+    --color-theme-button-hover: #eeb302;
+    --color-theme-button-disabled: #d1d7d8;
+    --color-theme-textarea-bg: #F8F9FA;
+  
+    --color-theme-container-gradient: linear-gradient(0deg, rgba(228, 233, 234, 1) 65%, rgba(255,255,255,1) 100%);
+    --color-theme-overlays-gradient: linear-gradient(0deg, rgba(41, 40, 40, 0.85) 0%, rgba(0, 0, 0, 0.7) 70%, rgba(1, 1, 1, 0.59) 100%);
+}
+
+.theme-ul-red {
+    --color-theme: #e30513;
+    --color-theme-light: #e30513;
+    --color-theme-white: #fff;
+  
+    --color-theme-button: #e30513;
+    --color-theme-button-hover: #c40612;
+    --color-theme-button-disabled: #d1d7d8;
+    --color-theme-textarea-bg: #F8F9FA;
+  
+    --color-theme-container-gradient: linear-gradient(0deg, rgba(228, 233, 234, 1) 65%, rgba(255,255,255,1) 100%);
+    --color-theme-overlays-gradient: linear-gradient(0deg, rgba(41, 40, 40, 0.85) 0%, rgba(0, 0, 0, 0.7) 70%, rgba(1, 1, 1, 0.59) 100%);
+}
+
+
+.wrapper {
+    border-radius: 8px;
+    box-shadow: 0 0 2px 1px rgba(0,0,0,.17);
+    background-color: white;
+    width: 788px;
+    height: 449px;
+    max-width: 800px;
+    max-height: 449px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .acitivity-container {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .overlays-container {
+    width: 100%;
+    height: 100%;
+    z-index: 3000;
+    position: absolute;
+    top: 0;
+    left: 0;
+    visibility: visible;
+    background: var(--color-theme-overlays-gradient);
+  }
+
+  .loading-overlay {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+  }
+
+  #confirmation-revisit-overlay {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+  }
+
+  #maintenance-overlay {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+  }
+  
+  #endpoint-overlay {
+      display: flex;
+      flex-direction: row;
+      align-items: left;
+      justify-content: space-between;
+      cursor: pointer !important;
+    }
+  
+  #started-overlay {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+    visibility: hidden;
+  }
+  
+  #icon-checkmark {
+    color: #fff;
+    font-size: 50px;
+    margin-bottom: -20px;
+  }
+
+  .transparent{
+    -webkit-filter: blur(5px);
+    -moz-filter: blur(5px);
+    -o-filter: blur(5px);
+    -ms-filter: blur(5px);
+    filter: blur(4px);
+    opacity: 1;
+  }
+
+
+  .bottom-gradient {
+    background: rgb(255,255,255);
+    background: linear-gradient(0deg, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%);
+    position: absolute;
+    bottom: 0;
+    z-index: 2000;
+    width: 100%;
+    height: 50px;
+    pointer-events: none;
+  }
+
+.footer {
+    width: 100%;
+    height: 150px;
+    padding: 0 30px;
+    background-color: #f4f6f8;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+
+button {
+    -webkit-border-radius: 6;
+    -moz-border-radius: 6;
+    border-radius: 6px;
+    border: none;
+    font-family: Overpass;
+    color: #ffffff;
+    font-size: 23px;
+    text-align: center;
+    background: var(--color-theme-button);
+    padding: 12px 20px 10px 20px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform 0.15s linear, background-color 0.3s;
+}
+
+button:hover {
+    background: var(--color-theme-button-hover);
+    text-decoration: none;
+    transform: scale(1.1);
+    cursor: pointer;
+}
+
+
+button:disabled {
+    background: var(--color-theme-button-disabled);
+    cursor: not-allowed;
+    text-decoration: none;
+}
+
+.maxchar {
+    font-size: 14px;
+  }
+
+/* Quill editor overrides */
+
+.ql-container {
+    height: calc(100% - 42px);
+  }
+
+.quill-container {
+  position: relative;
+  height: 100%;
+  margin: 10px;
+  margin-bottom: 18px;
+  overflow: hidden;
+}
+
+.ql-container.ql-snow {
+    border: 0px solid #ccc;
+}
+
+.ql-toolbar.ql-snow {
+    border-top: 0px solid #ccc;
+    border-right: 0px solid #ccc;
+    border-left: 0px solid #ccc;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 16px;
+
+}
+
+.ql-editor {
+    margin-top: 8px;
+    font-size: larger;
+    font-weight: 300;
+    max-height: 276px;
+}
+
+/* vue css directives */
+[v-cloak] {
+    display: none;
+}
+  
+.overlay-enter-active,
+.overlay-leave-active {
+  transition: opacity 0.5s;
+}
+.overlay-enter-from,
+.overlay-leave-to {
+  opacity: 0;
+}
+
+/* Disable text selection */
+
+.noselect {
+    -webkit-touch-callout: none; /* iOS Safari */
+      -webkit-user-select: none; /* Safari */
+       -khtml-user-select: none; /* Konqueror HTML */
+         -moz-user-select: none; /* Old versions of Firefox */
+          -ms-user-select: none; /* Internet Explorer/Edge */
+              user-select: none; /* Non-prefixed version, currently
+                                    supported by Chrome, Edge, Opera and Firefox */
+  }
+
+
+  /* Overlay text styles */
+
+  .overlays-container h1 {
+    font-weight: 600;
+    line-height: 1.12;
+  }
+
+  .overlays-container .text-accent {
+    font-weight: 600;
+    font-size: 1.3rem;
+    /* color: var(--color-theme-accent); */
+  }
