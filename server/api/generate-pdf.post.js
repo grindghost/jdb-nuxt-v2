@@ -34,7 +34,7 @@ export default defineEventHandler(async (event) => {
       setCookie(event, 'backpackId', validbackpackId, {
         httpOnly: true,
         secure: true,
-        sameSite: 'None',
+        sameSite: process.env.SAME_SITE,
       });
     }
 

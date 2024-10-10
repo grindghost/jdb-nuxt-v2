@@ -20,7 +20,7 @@ export default defineEventHandler(async (event) => {
         setCookie(event, 'backpackId', newEncryptedBackpackId, {
           httpOnly: true,
           secure: true,
-          sameSite: 'None',
+          sameSite: process.env.SAME_SITE,
           path: '/',
         })
         return { valid: true, backpackId: newEncryptedBackpackId }
@@ -37,7 +37,7 @@ export default defineEventHandler(async (event) => {
         setCookie(event, 'backpackId', newEncryptedBackpackId, {
           httpOnly: true,
           secure: true,
-          sameSite: 'None',
+          sameSite: process.env.SAME_SITE,
           path: '/',
         })
         return { valid: true, backpackId: newEncryptedBackpackId }
@@ -53,7 +53,7 @@ export default defineEventHandler(async (event) => {
       setCookie(event, 'backpackId', newEncryptedBackpackId, {
         httpOnly: true,
         secure: true,
-        sameSite: 'None',
+        sameSite: process.env.SAME_SITE,
         path: '/',
       })
       return { valid: true, backpackId: newEncryptedBackpackId }
