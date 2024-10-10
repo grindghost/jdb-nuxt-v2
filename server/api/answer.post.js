@@ -36,9 +36,9 @@ export default defineEventHandler(async (event) => {
     const sanitizedData = sanitizeHtml(data, {
         allowedTags: [
           'h1', 'h2', 'h3', 'h4', 'h5', 'h6', // All heading tags
-          'p', // Paragraphs
+          'p', 'span', 'br', // Paragraphs
           'ul', 'ol', 'li', // Lists (unordered and ordered, list items)
-          'b', 'i', 'u', 'strike' // Basic formatting (bold, italic, underline, strikethrough)
+          'b', 'i', 'u', 'strike', 'em', 'u', 'strong', 's' // Basic formatting (bold, italic, underline, strikethrough)
         ],
         allowedAttributes: {
             '*': ['class'], // Allow 'class' attribute on all tags

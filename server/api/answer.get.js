@@ -55,11 +55,11 @@ export default defineEventHandler(async (event) => {
         // Sanitize the decrypted content
         const sanitizedContent = sanitizeHtml(decryptedContent, {
             allowedTags: [
-              'h1', 'h2', 'h3', 'h4', 'h5', 'h6', // Headings
-              'p', // Paragraphs
-              'ul', 'ol', 'li', // Lists
-              'b', 'i', 'u', 'strike', // Text formatting
-            ],
+                'h1', 'h2', 'h3', 'h4', 'h5', 'h6', // All heading tags
+                'p', 'span', 'br', // Paragraphs
+                'ul', 'ol', 'li', // Lists (unordered and ordered, list items)
+                'b', 'i', 'u', 'strike', 'em', 'u', 'strong', 's' // Basic formatting (bold, italic, underline, strikethrough)
+              ],
             allowedAttributes: {
                 '*': ['class'], // Allow 'class' attribute on all tags
                 'li': ['data-list'] // Allow 'data-list' attribute only on 'li' tags
