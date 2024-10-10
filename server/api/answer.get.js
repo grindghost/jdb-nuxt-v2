@@ -26,7 +26,7 @@ export default defineEventHandler(async (event) => {
         httpOnly: true,
         secure: true,
         sameSite: process.env.SAME_SITE,
-        path: '/',
+        // path: '/',
       })
     }
 
