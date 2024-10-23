@@ -303,9 +303,9 @@
   // Step 1: Validate referrer (only on the client side)
   if (process.client) {
     const referrer = document.referrer || "";
-    // console.log('Referrer:', referrer);
+    console.log('Referrer:', referrer);
 
-    const allowedDomains = ["https://brioeducation.ca", "http://localhost:3000"];
+    const allowedDomains = ["https://pr.cloudfront.brioeducation.ca", "http://localhost:3000"];
     const isAllowedReferrer = allowedDomains.some(domain =>
       referrer.startsWith(domain)
     );
