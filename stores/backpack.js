@@ -17,7 +17,6 @@ export const useMainStore = defineStore('main', () => {
   const mode = ref("");
   
   const completedOverlay = ref(false);
-  const loadingOverlay = ref(false);
   const loadingStatus = ref(true);
 
   const placeholder = ref("");
@@ -28,9 +27,9 @@ export const useMainStore = defineStore('main', () => {
   const coverLoaded = ref(false);
 
   const remoteConfigs = ref({"maintenanceMode": false});
-  const localConfigs = ref({});
+  const localConfigs = ref({}); 
   const projectProfile = ref({});
-
+  const localeDict = ref({});
   const apiLiveStatus = ref(true);
 
 // Pinia handler to handle API requests (adjusted to include credentials for cookies)  // API request handler using Nuxt's built-in fetch function
@@ -57,7 +56,7 @@ export const useMainStore = defineStore('main', () => {
   };
 
   const PingApi = async () => {
-    console.log('ping');
+    // console.log('API is live');
     const response = await fetchFromApi('/ping');
     if (response) {
       remoteConfigs.value.maintenanceMode = false;
@@ -66,13 +65,13 @@ export const useMainStore = defineStore('main', () => {
     return false;
   };
 
-
+  
   const GetRemoteConfigs = async () => {
     // Check if the API is live before proceeding
     if (!apiLiveStatus.value) return
   
     // Use your custom fetch handler
-    const response = await fetchFromApi('/configs')
+    const response = await fetchFromApi('/pb/configs')
   
     // If the response is valid, update the `remoteConfigs`
     if (response) {
@@ -82,28 +81,34 @@ export const useMainStore = defineStore('main', () => {
     }
   }
 
-  const GetProjectProfileFromFirebase = async () => {
+  const GetProjectProfileFromDatabase = async () => {
     if (!apiLiveStatus.value) return;
 
     path.value = `${localConfigs.value["projectId"]}/${localConfigs.value["excerciceId"]}`;
 
-    const response = await fetchFromApi(`/projectProfile?projectId=${localConfigs.value["projectId"]}`);
+    const response = await fetchFromApi(`/pb/projectProfile?projectId=${localConfigs.value["projectId"]}`);
     if (response) {
+      
       projectProfile.value = response;
+
+      localeDict.value = projectProfile.value["locale"]
       endpoint.value = projectProfile.value["activities"][`${localConfigs.value["excerciceId"]}`]["isEndpoint"];
-      placeholder.value = projectProfile.value["activities"][`${localConfigs.value["excerciceId"]}`]["placeholder"];
+      
+      // placeholder.value = localeDict.value["placeholder"];
+      // placeholder.value = projectProfile.value["activities"][`${localConfigs.value["excerciceId"]}`]["placeholder"];
+      
       defaultText.value = projectProfile.value["activities"][`${localConfigs.value["excerciceId"]}`]["defaultText"];
       maxCharAllowed.value = projectProfile.value["activities"][`${localConfigs.value["excerciceId"]}`]["maxCharAllowed"];
     }
   };
 
 // Pinia store method to get answers from Firebase RTDB
-const GetAnswerFromFirebase = async () => {
+const GetAnswerFromDatabase = async () => {
   if (!apiLiveStatus.value) return;
 
   try {
     // Call the backend endpoint to get the answer
-    const response = await fetchFromApi(`/answer?path=${encodeURIComponent(path.value)}`);
+    const response = await fetchFromApi(`/pb/answer?path=${encodeURIComponent(path.value)}`);
 
     if (response && response.data) {
       // Sanitize the content
@@ -123,14 +128,18 @@ const GetAnswerFromFirebase = async () => {
   }
 
   // Hide the loading indicator
-  setTimeout(() => {
-    loadingStatus.value = false;
-  }, 1000);
+  loadingStatus.value = false;
+
+  // Define the placeholder here to avoid FOUC
+  placeholder.value = localeDict.value["placeholder"];
 };
 
 
 const SaveAnswer = async () => {
   if (!apiLiveStatus.value) return;
+
+  // Show the loading indicator
+  loadingStatus.value = true;
 
   const timestamp = Date.now().toString();
   endTime.value = performance.now();
@@ -140,7 +149,7 @@ const SaveAnswer = async () => {
   const sanitizedContent = DOMPurify.sanitize(answer.value);
 
   // Send the answer to the API
-  const response = await fetchFromApi('/answer', 'POST', {
+  const response = await fetchFromApi('/pb/answer', 'POST', {
     path: path.value,
     data: sanitizedContent,
     date: timestamp,
@@ -148,10 +157,21 @@ const SaveAnswer = async () => {
   });
 
   if (response && response.message === 'Data saved successfully') {
-    completedOverlay.value = true;
-    mode.value = "edition";
-    startTime.value = performance.now();
-    endTime.value = 0;
+
+    setTimeout(() => {
+      
+      // Hide the loading indicator
+      loadingStatus.value = false;
+
+      completedOverlay.value = true;
+      mode.value = "edition";
+      startTime.value = performance.now();
+      endTime.value = 0;
+
+    }, 1000);
+
+
+
   } else {
     console.error("Failed to save the answer");
   }
@@ -165,7 +185,7 @@ const DownloadFilledPdf = async () => {
     loadingStatus.value = true;
 
     // Send the request without the userId, as it's handled by the server
-    const response = await fetchFromApi('/generate-pdf', 'POST', {
+    const response = await fetchFromApi('/pb/generate-pdf', 'POST', {
       projectId: localConfigs.value["projectId"],
       projectProfile: projectProfile.value,
       remoteConfigs: remoteConfigs.value
@@ -205,18 +225,18 @@ const DownloadFilledPdf = async () => {
 
 
 const ValidateUser = async (source) => {
+
   try {
-    const response = await fetchFromApi('/check-user', 'POST', { source });
+    const response = await fetchFromApi('/pb/check-user', 'POST', { source });
 
     if (!response || !response.valid) {
       throw new Error('User validation failed');
     }
 
-    isAppVisible.value = response.valid;
     return response;
+
   } catch (error) {
     console.error('Validation failed:', error);
-    isAppVisible.value = false;
     return { valid: false };
   }
 }; 
@@ -231,7 +251,6 @@ const ValidateUser = async (source) => {
     timeElapsed,
     mode,
     completedOverlay,
-    loadingOverlay,
     loadingStatus,
     apiLiveStatus,
     remoteConfigs,
@@ -242,12 +261,12 @@ const ValidateUser = async (source) => {
     coverLoaded,
     projectProfile,
     localConfigs,
+    localeDict,
     PingApi,
-    //GetBackpackReference,
     GetRemoteConfigs,
-    GetAnswerFromFirebase,
+    GetAnswerFromDatabase,
     SaveAnswer,
-    GetProjectProfileFromFirebase,
+    GetProjectProfileFromDatabase,
     DownloadFilledPdf,
     ValidateUser,
   };
