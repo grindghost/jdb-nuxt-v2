@@ -305,7 +305,7 @@
     const referrer = document.referrer || "";
     // console.log('Referrer:', referrer);
 
-    const allowedDomains = ["https://lms.example.com", "http://localhost:3000"];
+    const allowedDomains = ["https://brioeducation.ca", "http://localhost:3000"];
     const isAllowedReferrer = allowedDomains.some(domain =>
       referrer.startsWith(domain)
     );
