@@ -14,7 +14,7 @@ export default defineNuxtConfig({
     routeRules: {
       '/**': {
         headers: {
-          'Content-Security-Policy': "frame-ancestors 'self' https://www.brioeducation.ca",
+          'Content-Security-Policy': "frame-ancestors 'self' https://www.brioeducation.ca http://localhost:3000",
         }
       }
     }
