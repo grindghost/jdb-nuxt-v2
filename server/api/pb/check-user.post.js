@@ -1,6 +1,6 @@
 import { getCookie, setCookie, createError } from 'h3';
 import { pb } from '~/server/plugins/pocketbase'; // Import Pocketbase instance
-import { decryptContent, encryptContent, createNewUser } from '~/server/utils/authPB'; // Use adapted helper methods
+import { decryptContent, createNewUser } from '~/server/utils/authPB'; // Use adapted helper methods
 
 // Main handler for the /check-user POST request
 export default defineEventHandler(async (event) => {
@@ -12,7 +12,7 @@ export default defineEventHandler(async (event) => {
   try {
     if (backpackId && backpackId !== 'defaultbackpackId') {
       // Step 1: Decrypt the backpackId
-      const decryptedBackpackId = decryptContent(backpackId);
+      const decryptedBackpackId = await decryptContent(backpackId);
 
       // Validate the decrypted key
       if (!decryptedBackpackId || decryptedBackpackId.length < 15) {

@@ -11,7 +11,7 @@ export default defineEventHandler(async (event) => {
     
     try {
       // Decrypt the backpackId to get the userId
-      const decryptedBackpackId = decryptContent(backpackId)
+      const decryptedBackpackId = await decryptContent(backpackId)
 
       // Validate the decrypted key
       if (!decryptedBackpackId || decryptedBackpackId.length < 20) {

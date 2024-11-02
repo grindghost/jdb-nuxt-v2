@@ -10,12 +10,12 @@ export const generateUniqueID = (idLength) => {
 };
 
 // Helper function to encrypt content
-export const encryptContent = (content) => {
+export const encryptContent = async (content) => {
   return CryptoJS.AES.encrypt(content, process.env.SECRET_KEY).toString()
 }
 
 // Helper function to decrypt content
-export const decryptContent = (cipherText) => {
+export const decryptContent = async (cipherText) => {
   const bytes = CryptoJS.AES.decrypt(cipherText, process.env.SECRET_KEY)
   return bytes.toString(CryptoJS.enc.Utf8)
 }
@@ -35,7 +35,7 @@ export const createNewUser = async (db) => {
       newBackpackId = `dev-${newBackpackId}`
     }
 
-    const encryptedBackpackId = encryptContent(newBackpackId)
+    const encryptedBackpackId = await encryptContent(newBackpackId)
 
     // Store the new user data in Firebase
     await db.ref(`Backpacks/${newBackpackId}`).set({
@@ -57,7 +57,7 @@ export const validateOrCreateUser = async (db, backpackId, req) => {
   if (backpackId && backpackId !== 'defaultbackpackId') {
     try {
       // Decrypt the backpackId
-      const decryptedbackpackId = decryptContent(backpackId, secretKey);
+      const decryptedbackpackId = await decryptContent(backpackId, secretKey);
 
       // Validate the decrypted key
       if (!decryptedbackpackId || decryptedbackpackId.length < 20) {
