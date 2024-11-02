@@ -9,12 +9,12 @@ export const generateUniqueID = (idLength) => {
 };
 
 // Helper function to encrypt content
-export const encryptContent = async (content) => {
+export const encryptContent = (content) => {
   return CryptoJS.AES.encrypt(content, process.env.SECRET_KEY).toString()
 }
 
 // Helper function to decrypt content
-export const decryptContent = async (cipherText) => {
+export const decryptContent = (cipherText) => {
   const bytes = CryptoJS.AES.decrypt(cipherText, process.env.SECRET_KEY)
   return bytes.toString(CryptoJS.enc.Utf8)
 }
@@ -40,7 +40,7 @@ export const createNewUser = async (pb) => {
     }
 
     // Step 3: Encrypt the new backpack ID
-    const encryptedBackpackId = await encryptContent(newBackpackId);
+    const encryptedBackpackId = encryptContent(newBackpackId);
     const creationDate = new Date().toISOString(); // Format to ISO 8601
 
     // Step 4: Store the new user data in the 'backpacks' collection
@@ -65,7 +65,7 @@ export const validateOrCreateUser = async (pb, backpackId, req) => {
   try {
     if (backpackId && backpackId !== 'defaultbackpackId') {
       // Step 1: Decrypt the backpackId
-      const decryptedbackpackId = await decryptContent(backpackId, secretKey);
+      const decryptedbackpackId = decryptContent(backpackId, secretKey);
 
       // Validate the decrypted key
       if (!decryptedbackpackId || decryptedbackpackId.length < 15) {
