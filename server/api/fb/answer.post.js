@@ -46,10 +46,9 @@ export default defineEventHandler(async (event) => {
           }
       })
 
-    // const encryptedAnswer = encryptContent(data)
 
     // Encrypt the sanitized content
-    const encryptedAnswer = encryptContent(sanitizedData)
+    const encryptedAnswer = await encryptContent(sanitizedData)
 
     const historic_event = {
       answer: encryptedAnswer,

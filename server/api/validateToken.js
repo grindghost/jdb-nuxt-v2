@@ -17,7 +17,7 @@ export default defineEventHandler(async (event) => {
 
   try {
     const decodedToken = token;
-    const decryptedPayload = decryptContent(decodedToken);
+    const decryptedPayload = await decryptContent(decodedToken);
 
     return decryptedPayload; // Send decrypted data back to client
   } catch (error) {

@@ -9,12 +9,12 @@ export const generateUniqueID = (idLength) => {
 };
 
 // Helper function to encrypt content
-export const encryptContent = (content) => {
+export const encryptContent = async (content) => {
   return CryptoJS.AES.encrypt(content, process.env.SECRET_KEY).toString()
 }
 
 // Helper function to decrypt content
-export const decryptContent = (cipherText) => {
+export const decryptContent = async (cipherText) => {
   const bytes = CryptoJS.AES.decrypt(cipherText, process.env.SECRET_KEY)
   return bytes.toString(CryptoJS.enc.Utf8)
 }
@@ -40,7 +40,7 @@ export const createNewUser = async (pb) => {
     }
 
     // Step 3: Encrypt the new backpack ID
-    const encryptedBackpackId = encryptContent(newBackpackId);
+    const encryptedBackpackId = await encryptContent(newBackpackId);
     const creationDate = new Date().toISOString(); // Format to ISO 8601
 
     // Step 4: Store the new user data in the 'backpacks' collection
@@ -65,7 +65,7 @@ export const validateOrCreateUser = async (pb, backpackId, req) => {
   try {
     if (backpackId && backpackId !== 'defaultbackpackId') {
       // Step 1: Decrypt the backpackId
-      const decryptedbackpackId = decryptContent(backpackId, secretKey);
+      const decryptedbackpackId = await decryptContent(backpackId, secretKey);
 
       // Validate the decrypted key
       if (!decryptedbackpackId || decryptedbackpackId.length < 15) {
@@ -82,29 +82,34 @@ export const validateOrCreateUser = async (pb, backpackId, req) => {
         // If user doesn't exist, create a new one
         console.log('User not found, creating a new one.');
         const newEncryptedbackpackId = await createNewUser(pb);
+        const decryptedbackpackId = await decryptContent(newEncryptedbackpackId, secretKey);
+
         return {
           valid: true,
           backpackId: newEncryptedbackpackId,
-          decryptedbackpackId: decryptContent(newEncryptedbackpackId, secretKey),
+          decryptedbackpackId: decryptedbackpackId,
         };
       }
     } else {
       // If no valid backpackId is provided or it's the default, create a new user
       const newEncryptedbackpackId = await createNewUser(pb);
+      const decryptedbackpackId = await decryptContent(newEncryptedbackpackId, secretKey);
+
       return {
         valid: true,
         backpackId: newEncryptedbackpackId,
-        decryptedbackpackId: decryptContent(newEncryptedbackpackId, secretKey),
+        decryptedbackpackId: decryptedbackpackId,
       };
     }
   } catch (error) {
     console.error('User validation or creation error:', error.message);
     // In case of an error, create a new user
     const newEncryptedbackpackId = await createNewUser(pb);
+    const decryptedbackpackId = await decryptContent(newEncryptedbackpackId, secretKey);
     return {
       valid: true,
       backpackId: newEncryptedbackpackId,
-      decryptedbackpackId: decryptContent(newEncryptedbackpackId, secretKey),
+      decryptedbackpackId: decryptedbackpackId,
     };
   }
 };

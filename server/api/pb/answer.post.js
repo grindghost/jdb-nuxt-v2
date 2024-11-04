@@ -34,7 +34,7 @@ export default defineEventHandler(async (event) => {
       }
     });
     
-    const encryptedAnswer = encryptContent(sanitizedData);
+    const encryptedAnswer = await encryptContent(sanitizedData);
 
     // Step 4: Save the new historic event in Pocketbase
     const timestamp = new Date().toISOString(); // Format to ISO 8601

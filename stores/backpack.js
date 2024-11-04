@@ -1,9 +1,11 @@
 import { defineStore } from 'pinia';
 import DOMPurify from 'dompurify';
 import Bowser from "bowser"; // To detect browser... (especially for Firefox)
+import { useStatusStore } from '/stores/status';
 
 export const useMainStore = defineStore('main', () => {
 
+  const statusStore = useStatusStore();
   const isAppVisible = ref(false); // Default to false
 
   const path = ref(""); 
@@ -31,6 +33,7 @@ export const useMainStore = defineStore('main', () => {
   const projectProfile = ref({});
   const localeDict = ref({});
   const apiLiveStatus = ref(true);
+  const statusMessage = ref(statusStore.status[statusStore.locale].loading);
 
 // Pinia handler to handle API requests (adjusted to include credentials for cookies)  // API request handler using Nuxt's built-in fetch function
   const fetchFromApi = async (endpoint, method = 'GET', body = null, isBinary = false) => {
@@ -67,6 +70,10 @@ export const useMainStore = defineStore('main', () => {
 
   
   const GetRemoteConfigs = async () => {
+
+    // Set the status message
+    statusMessage.value = statusStore.status[statusStore.locale].getRemoteConfigs;
+
     // Check if the API is live before proceeding
     if (!apiLiveStatus.value) return
   
@@ -83,6 +90,9 @@ export const useMainStore = defineStore('main', () => {
 
   const GetProjectProfileFromDatabase = async () => {
     if (!apiLiveStatus.value) return;
+
+    // Set the status message
+    statusMessage.value = statusStore.status[statusStore.locale].getProjectProfile;
 
     path.value = `${localConfigs.value["projectId"]}/${localConfigs.value["excerciceId"]}`;
 
@@ -105,6 +115,9 @@ export const useMainStore = defineStore('main', () => {
 // Pinia store method to get answers from Firebase RTDB
 const GetAnswerFromDatabase = async () => {
   if (!apiLiveStatus.value) return;
+
+  // Set the status message
+  statusMessage.value = statusStore.status[statusStore.locale].getAnswer;
 
   try {
     // Call the backend endpoint to get the answer
@@ -137,6 +150,9 @@ const GetAnswerFromDatabase = async () => {
 
 const SaveAnswer = async () => {
   if (!apiLiveStatus.value) return;
+
+  // Set the status message
+  statusMessage.value = statusStore.status[statusStore.locale].saveAnswer;
 
   // Show the loading indicator
   loadingStatus.value = true;
@@ -227,7 +243,7 @@ const DownloadFilledPdf = async () => {
 const ValidateUser = async (source) => {
 
   try {
-    const response = await fetchFromApi('/pb/check-user', 'POST', { source });
+    const response = await fetchFromApi('/pb/login', 'POST', { source });
 
     if (!response || !response.valid) {
       throw new Error('User validation failed');
@@ -262,6 +278,7 @@ const ValidateUser = async (source) => {
     projectProfile,
     localConfigs,
     localeDict,
+    statusMessage,
     PingApi,
     GetRemoteConfigs,
     GetAnswerFromDatabase,
@@ -271,3 +288,8 @@ const ValidateUser = async (source) => {
     ValidateUser,
   };
 });
+
+// Hot module replacement
+if (import.meta.hot) {
+  import.meta.hot.accept(acceptHMRUpdate(useMainStore, import.meta.hot));
+}

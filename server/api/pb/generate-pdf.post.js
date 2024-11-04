@@ -73,7 +73,7 @@ export default defineEventHandler(async (event) => {
 
     // Populate formData with the most recent answers per activity
     for (const [activityId, event] of Object.entries(latestEvents)) {
-      const decryptedContent = decryptContent(event.answer); // Decrypt the content
+      const decryptedContent = await decryptContent(event.answer); // Decrypt the content
 
       // Convert HTML to plain text while preserving structure
       const plainTextAnswer = convertQuillHtmlToText(decryptedContent);

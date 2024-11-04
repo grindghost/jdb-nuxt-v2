@@ -11,15 +11,19 @@
           class="overlays-container noselect"
           v-if="store.loadingStatus  || store.completedOverlay || store.endpoint || store.remoteConfigs.maintenanceMode"
       >  
-      
         <!-- 1) Loading overlay --> 
+        <Transition name="overlay">
         <div 
           class="loading-overlay"
           v-if="store.loadingStatus"
         >
           <!-- Loading icons -->
-          <fa icon="fas fa-spinner" class="fa-pulse" id="icon-checkmark" />
+          <fa icon="fas fa-spinner" class="fa-pulse" id="icon-loading" />
+
+          <!-- Loading text -->
+          <p v-html="store.statusMessage"></p>
         </div>
+        </Transition>
 
         <!-- 2) Confirmation/revisit overlay -->
         <Transition name="overlay">
@@ -204,6 +208,7 @@
             />
           </div>
         </div>
+
       </div>
 
 
@@ -250,7 +255,11 @@
   
   <script setup>
     import { useMainStore } from '/stores/backpack';
+    import { useStatusStore } from '/stores/status';
+
     const store = useMainStore();
+    const statusStore = useStatusStore();
+    const config = useRuntimeConfig();
 
     // Middleware to guard the access, and provide access
     definePageMeta({
@@ -296,19 +305,35 @@
   });
 
   onMounted(async () => {
-
+    
   // Add a small delay to allow cookies to be restored after sleep
-  await new Promise(resolve => setTimeout(resolve, 500));
+  // await new Promise(resolve => setTimeout(resolve, 500));
+
+  store.loadingStatus = true;
+  store.isAppVisible = true;
+
+  // Step 1: Get the language from the query parameters
+  const queryParams = new URLSearchParams(window.location.search); 
+  const lang = queryParams.get('lang') || 'fr';
+
+  if (lang !== 'fr' && lang !== 'en') {
+    console.error('Invalid language:', lang);
+    statusStore.locale = 'fr';
+  } else {
+    statusStore.locale = lang;
+  }
 
   // Step 1: Validate referrer (only on the client side)
-  if (process.client) {
+  if (process.client  && process.env.NODE_ENV === 'production') {
+    
+    store.statusMessage = statusStore.status[lang].referrerValidation;
+    
     const referrer = document.referrer || "";
     console.log('Referrer:', referrer);
 
-    const allowedDomains = ["https://pr.cloudfront.brioeducation.ca", "http://localhost:3000"];
-    const isAllowedReferrer = allowedDomains.some(domain =>
-      referrer.startsWith(domain)
-    );
+    const isAllowedReferrer = config.allowedReferrerDomains.some(domain =>
+          referrer.startsWith(domain)
+        );
 
     if (!isAllowedReferrer) {
       // console.error('Invalid referrer:', referrer);
@@ -320,8 +345,9 @@
   }
 
     // Ping the API to check if it's live...
+    store.statusMessage = statusStore.status[lang].apiPing;
+
     const apiIsLive = await store.PingApi();
-    // console.log('API is live:', apiIsLive);
     if (!apiIsLive) {
       document.body.innerHTML = "🔓 API isn't live.";
       store.loadingStatus = false;
@@ -330,7 +356,7 @@
     }
 
   // Step 2: Retrieve token using URLSearchParams
-  const queryParams = new URLSearchParams(window.location.search); 
+  store.statusMessage = statusStore.status[lang].getToken;
   const token = queryParams.get('token');
 
   if (!token) {
@@ -343,18 +369,17 @@
 
   try {
     // Step 3: Validate and decrypt the token with the server
+    store.statusMessage = statusStore.status[lang].decodeToken;
     const decryptedPayload = await $fetch('/api/validateToken', {
       method: 'GET',
       params: { token },
     });
 
-    // console.log('API response:', decryptedPayload);
     const decryptedPayloadJson = JSON.parse(decryptedPayload);
     const { source, project, exercice } = decryptedPayloadJson;
 
     // Step 4: Validate decrypted parameters
-    if (!source || source !== "brioeducation" || !project || !exercice) {
-      // console.error('Invalid or missing parameters.');
+    if (!source || source !== config.public.allowedSource || !project || !exercice) {
       document.body.innerHTML = "🔓 Invalid or missing parameters in the token."; // Lock emoji for invalid parameters
       store.loadingStatus = false;
       store.isAppVisible = false; // Ensure app is not displayed
@@ -362,9 +387,9 @@
     }
 
     // Step 5: Validate the user with the backend
+    store.statusMessage = statusStore.status[lang].loginUser;
     const response = await store.ValidateUser(source);
     if (!response || !response.valid) {
-      // console.error('User validation failed.');
       document.body.innerHTML = "🔓 User validation failed."; // Lock emoji for invalid user
       store.loadingStatus = false;
       store.isAppVisible = false;
@@ -374,21 +399,11 @@
     // Step 6: Store relevant data in the Pinia store
     store.localConfigs["projectId"] = project;
     store.localConfigs["excerciceId"] = exercice;
-    // console.log('localConfigs:', store.localConfigs);
-
-    store.isAppVisible = true; // Make app visible after validation
 
     // Step 7: Fetch additional data from the backend
-    // console.log('Fetching remote configs...');
     await store.GetRemoteConfigs();
-    // console.log('Remote configs:', store.remoteConfigs);
-
-    // console.log('Fetching project profile...');
     await store.GetProjectProfileFromDatabase();
-
-    // console.log('Fetching user answers...');
     await store.GetAnswerFromDatabase();
-    // console.log('All data fetched successfully.');
 
     // Step 8: Track the session start time (client-side only)
     store.startTime = performance.now();
@@ -396,63 +411,13 @@
 
   } catch (error) {
     console.error('Token validation failed:', error);
-    document.body.innerHTML = "🔓"; // Lock emoji for token errors
+    document.body.innerHTML = "🔓 Invalid token"; // Lock emoji for token errors
     store.loadingStatus = false;
     store.isAppVisible = false; // Ensure app is not displayed
   }
 });
 
-  /*
-  onMounted(async () => {
-    const queryParams = new URLSearchParams(window.location.search); 
-    const source = queryParams.get('source');
-    const projectID = queryParams.get('project');
-    const exerciceID = queryParams.get('exercice');
-
-    // Ensure all required parameters are present in the URL and source is valid
-    if (!source || source !== 'brioeducation' || !projectID || !exerciceID) {
-      store.isAppVisible = false;
-      document.body.innerHTML = "🔓"; // Display lock emoji for invalid or missing parameters
-      return;
-    }
-
-    // Ping the API to check if it's live...
-    const apiIsLive = await store.PingApi();
-    if (!apiIsLive) {
-      store.loadingStatus = false;
-      store.isAppVisible = false; // Ensure app is not displayed
-      return;
-    }
-
-    // Send the key to the backend for validation
-    const response = await store.ValidateUser(source);
-    if (response && response.valid) {
-      
-      // store.backpack = key; // Assign encrypted user ID to Pinia store
-      store.localConfigs["projectId"] = projectID;
-      store.localConfigs["excerciceId"] = exerciceID;
-      
-      store.isAppVisible = true; // Show app after validation
-
-      await store.GetRemoteConfigs();
-      await store.GetProjectProfileFromDatabase();
-      await store.GetAnswerFromDatabase();
-    } else {
-
-      // Display lock emoji for invalid or missing parameters
-      store.loadingStatus = false;
-      store.isAppVisible = false;
-      document.body.innerHTML = "🔓";
-    }
-
-    window.addEventListener("load", () => {
-      store.startTime = performance.now();
-    });
-  });
-
-  */
-
-    // Watch the `answer` ref from the store and update `isAnswerEmpty`
+   // Watch the `answer` ref from the store and update `isAnswerEmpty`
     watch(() => store.answer, (newAnswer) => {
         isAnswerEmpty.value = checkIfEmpty(newAnswer);
     });

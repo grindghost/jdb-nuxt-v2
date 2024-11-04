@@ -9,6 +9,12 @@ export default defineNuxtConfig({
     'quill/dist/quill.snow.css',
     '@/assets/global.css',  // Your global CSS file
   ],
+  runtimeConfig: {
+    public: {
+      allowedReferrerDomains: (process.env.ALLOWED_REFERRER_DOMAINS || '').split(','),
+      allowedSource: process.env.ALLOWED_SOURCE,
+    }
+  },
 
   nitro: {
     routeRules: {

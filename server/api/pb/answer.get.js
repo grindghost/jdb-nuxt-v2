@@ -10,8 +10,6 @@ export default defineEventHandler(async (event) => {
   const path = getQuery(event).path; // Get the path from query params
 
   try {
-    // console.log('Path:', path); // Debugging log for path
-
     // Step 1: Validate or create the user
     const { valid, backpackId: validBackpackId, decryptedbackpackId } = await validateOrCreateUser(pb, backpackId, event);
 
@@ -37,9 +35,6 @@ export default defineEventHandler(async (event) => {
     const courseId = path.split('/')[0];
     const activityId = path.split('/')[1];
 
-    // console.log(backpackId, decryptedbackpackId);
-    // console.log('Course ID:', courseId, 'Activity ID:', activityId); // Debugging log
-
     let matchingEvents = [];
 
     // Step 4: Query the `history` collection for matching records
@@ -61,7 +56,7 @@ export default defineEventHandler(async (event) => {
     const latestEvent = matchingEvents[0];
 
     // Step 6: Decrypt and sanitize the answer content
-    const decryptedContent = decryptContent(latestEvent.answer);
+    const decryptedContent = await decryptContent(latestEvent.answer);
 
     const sanitizedContent = sanitizeHtml(decryptedContent, {
       allowedTags: [

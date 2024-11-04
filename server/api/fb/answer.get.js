@@ -50,7 +50,7 @@ export default defineEventHandler(async (event) => {
 
       if (historySnapshot.exists()) {
         // Decrypt the answer content
-        const decryptedContent = decryptContent(historySnapshot.val().answer)
+        const decryptedContent = await decryptContent(historySnapshot.val().answer)
 
         // Sanitize the decrypted content
         const sanitizedContent = sanitizeHtml(decryptedContent, {
