@@ -197,7 +197,7 @@ const SaveAnswer = async () => {
 const DownloadFilledPdf = async () => {
   if (!apiLiveStatus.value) return;
 
-  // Set the status message
+  // Set the status message for the pdf download
   statusMessage.value = statusStore.status[statusStore.locale].downloadPDF;
 
   try {
