@@ -324,14 +324,14 @@
   }
 
   // Step 1: Validate referrer (only on the client side)
-  if (process.client  && process.env.NODE_ENV === 'production') {
+  if (process.client && process.env.NODE_ENV === 'production' ) {
     
     store.statusMessage = statusStore.status[lang].referrerValidation;
     
     const referrer = document.referrer || "";
     console.log('Referrer:', referrer);
 
-    const isAllowedReferrer = config.allowedReferrerDomains.some(domain =>
+    const isAllowedReferrer = config.public.allowedReferrerDomains.some(domain =>
           referrer.startsWith(domain)
         );
 
