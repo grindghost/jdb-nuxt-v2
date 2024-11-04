@@ -6,7 +6,11 @@ const pb = new PocketBase('https://jdb.pockethost.io/'); // Replace with your Po
 // Function to authenticate admin
 async function authenticateAdmin() {
   try {
-    await pb.admins.authWithPassword(process.env.PB_ADMIN_EMAIL, process.env.PB_ADMIN_PASSWORD);
+    await pb.admins.authWithPassword(process.env.PB_ADMIN_EMAIL, process.env.PB_ADMIN_PASSWORD, {
+      // This will trigger auto refresh or auto reauthentication in case
+      // the token has expired or is going to expire in the next 30 minutes.
+      autoRefreshThreshold: 30 * 60
+    });
     console.log('Pocketbase admin authenticated successfully.');
   } catch (error) {
     console.error('Failed to authenticate admin:', error.message);
