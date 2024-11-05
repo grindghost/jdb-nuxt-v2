@@ -1,8 +1,10 @@
 import { createError, getQuery } from 'h3'; // Import utilities from h3
-import { pb } from '~/server/plugins/pocketbase'; // Import Pocketbase instance
+import { pb, ensureAuthenticated } from '~/server/plugins/pocketbase'; // Import Pocketbase instance
 
 export default defineEventHandler(async (event) => {
   const { projectId } = getQuery(event); // Get the projectId from query parameters
+
+  await ensureAuthenticated("Project profile"); // Ensure authentication before each request
 
   try {
     // Step 1: Fetch the project profile from the `Projects` collection

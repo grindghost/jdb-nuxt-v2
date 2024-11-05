@@ -1,11 +1,13 @@
 import { getCookie, setCookie, readBody } from 'h3';
-import { pb } from '~/server/plugins/pocketbase'; // Import Pocketbase instance directly
+import { pb, ensureAuthenticated } from '~/server/plugins/pocketbase'; // Import Pocketbase instance directly
 import { encryptContent, validateOrCreateUser } from '~/server/utils/authPB';
 import sanitizeHtml from 'sanitize-html'; // Import sanitize-html for sanitization
 
 export default defineEventHandler(async (event) => {
   const backpackId = getCookie(event, 'backpackId'); // Get the backpackId from cookies
   const { path, data, date, timeElapsed } = await readBody(event); // Get the request body using readBody
+
+  await ensureAuthenticated("Save answer"); // Ensure authentication before each request
 
   try {
     // Step 1: Validate or create user

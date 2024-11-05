@@ -1,13 +1,15 @@
 // server/api/pb/answer.get.js
 
 import { getCookie, setCookie, createError } from 'h3';
-import { pb } from '~/server/plugins/pocketbase'; // Import Pocketbase instance
+import { pb, ensureAuthenticated } from '~/server/plugins/pocketbase'; // Import Pocketbase instance
 import { validateOrCreateUser, decryptContent } from '~/server/utils/authPB'; // Use adapted helper methods
 import sanitizeHtml from 'sanitize-html';
 
 export default defineEventHandler(async (event) => {
   const backpackId = getCookie(event, 'backpackId'); // Get the backpackId from cookies
   const path = getQuery(event).path; // Get the path from query params
+
+  await ensureAuthenticated("Get answer"); // Ensure authentication before each request
 
   try {
     // Step 1: Validate or create the user

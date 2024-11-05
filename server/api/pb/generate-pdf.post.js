@@ -1,6 +1,6 @@
 import { PDFDocument } from 'pdf-lib';
 import emojiStrip from 'emoji-strip';
-import { pb } from '~/server/plugins/pocketbase'; // Import Pocketbase instance
+import { pb, ensureAuthenticated } from '~/server/plugins/pocketbase'; // Import Pocketbase instance
 import { getCookie, setCookie, createError, readBody, getMethod, setResponseHeaders } from 'h3';
 import { validateOrCreateUser, decryptContent, convertQuillHtmlToText } from '~/server/utils/authPB';
 
@@ -18,6 +18,8 @@ export default defineEventHandler(async (event) => {
 
   const backpackId = getCookie(event, 'backpackId'); // Get backpackId from the cookie
   const { projectId, projectProfile, remoteConfigs } = await readBody(event); // Read POST body
+
+  await ensureAuthenticated("Generate PDF"); // Ensure authentication before each request
 
   try {
     // Validate or create user

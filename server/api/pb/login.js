@@ -1,12 +1,14 @@
 import { getCookie, setCookie, createError } from 'h3';
-import { pb } from '~/server/plugins/pocketbase'; // Import Pocketbase instance
+import { pb, ensureAuthenticated } from '~/server/plugins/pocketbase'; // Import Pocketbase instance
 import { decryptContent, createNewUser } from '~/server/utils/authPB'; // Use adapted helper methods
 
 // Main handler for the /check-user POST request
 export default defineEventHandler(async (event) => {
   const backpackId = getCookie(event, 'backpackId'); // Read from cookies
 
-  console.log('CheckingBackpack ID received from the cookie:', backpackId);
+  console.log('Backpack ID received from the cookie:', backpackId);
+
+  await ensureAuthenticated("Login"); // Ensure authentication before each request
 
   // Validate or create a new user
   try {
