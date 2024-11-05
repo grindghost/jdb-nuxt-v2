@@ -8,14 +8,15 @@ const pb = new PocketBase('https://jdb.pockethost.io/'); // Replace with your Po
 // Function to ensure the admin is authenticated
 async function ensureAuthenticated(origin) {
 
-  console.log(`${origin}:`, 'Checking if admin is authenticated...');
+  console.log('Checking auth status from :', `${origin}`);
   
   if (!pb.authStore.isValid || !isAuthenticated) {
     try {
       await pb.admins.authWithPassword(process.env.PB_ADMIN_EMAIL, process.env.PB_ADMIN_PASSWORD, {
         autoRefreshThreshold: 30 * 60,
+        autoCancel: false, // Prevents auto-cancellation of this request
       });
-      console.log('Ok, Pocketbase admin authenticated successfully.');
+      console.log('Re-authenticated admin successfully.');
       isAuthenticated = true;
     } catch (error) {
       console.error('Failed to authenticate admin:', error.message);
