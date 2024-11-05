@@ -5,8 +5,34 @@ let isAuthenticated = false;
 // Initialize PocketBase client
 const pb = new PocketBase('https://jdb.pockethost.io/'); // Replace with your Pocketbase URL
 
-// Function to ensure the admin is authenticated
 async function ensureAuthenticated(origin) {
+  
+  console.log('Checking auth status from :', `${origin}`);
+
+  if (!pb.authStore.isValid || !isAuthenticated) {
+    let retries = 3;
+    while (retries > 0) {
+      try {
+        await pb.admins.authWithPassword(process.env.PB_ADMIN_EMAIL, process.env.PB_ADMIN_PASSWORD, {
+          autoRefreshThreshold: 30 * 60,
+          autoCancel: false,
+        });
+        console.log('Pocketbase admin authenticated successfully.');
+        isAuthenticated = true;
+        break;
+      } catch (error) {
+        retries -= 1;
+        console.error(`Authentication attempt failed. Retries left: ${retries}`, error.message);
+        if (retries === 0) throw new Error('Pocketbase admin authentication failed.');
+        await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait 1 second before retrying
+      }
+    }
+  }
+}
+
+
+// Function to ensure the admin is authenticated
+async function _ensureAuthenticated(origin) {
 
   console.log('Checking auth status from :', `${origin}`);
   
