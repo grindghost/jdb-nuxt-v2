@@ -12,12 +12,13 @@ async function ensureAuthenticated(origin) {
   if (!pb.authStore.isValid || !isAuthenticated) {
     let retries = 3;
     while (retries > 0) {
+      console.log(`Retrying authentication. Retries left: ${retries}`);
       try {
         await pb.admins.authWithPassword(process.env.PB_ADMIN_EMAIL, process.env.PB_ADMIN_PASSWORD, {
           autoRefreshThreshold: 30 * 60,
           autoCancel: false,
         });
-        console.log('Pocketbase admin authenticated successfully.');
+        console.log('Pocketbase admin re-authenticated successfully.');
         isAuthenticated = true;
         break;
       } catch (error) {
