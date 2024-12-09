@@ -10,7 +10,7 @@ export default defineEventHandler(async (event) => {
   await ensureAuthenticated("Save answer"); // Ensure authentication before each request
 
   try {
-    // Step 1: Validate or create user
+    // Step 1: Validate or create user...
     const { valid, backpackId: validBackpackId, decryptedbackpackId } = await validateOrCreateUser(pb, backpackId, event);
 
     if (!valid) {

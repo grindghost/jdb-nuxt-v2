@@ -101,7 +101,10 @@ export default defineEventHandler(async (event) => {
     const fields = form.getFields();
     fields.forEach((field) => {
       const fieldName = field.getName();
-      if (formData[fieldName]) {
+      const fieldType = field.constructor.name;
+
+      // Check if the field is a PDFTextField, to avoid errors when filling it: This tool is only to fill text fields...
+      if (formData[fieldName] && fieldType == 'PDFTextField') {
         field.setText(formData[fieldName]); // Fill field if answer exists
       } else {
         console.warn(`No answer found for field: ${fieldName}`); // Skip if no answer

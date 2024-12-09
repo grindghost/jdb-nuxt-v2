@@ -2,11 +2,15 @@ import { defineStore } from 'pinia';
 import DOMPurify from 'dompurify';
 import Bowser from "bowser"; // To detect browser... (especially for Firefox)
 import { useStatusStore } from '/stores/status';
+import { RemovePageFromEmptyDocumentError } from 'pdf-lib';
+import { load } from 'cheerio';
 
 export const useMainStore = defineStore('main', () => {
 
   const statusStore = useStatusStore();
   const isAppVisible = ref(false); // Default to false
+
+  const unitIsReady = ref(false);
 
   const path = ref(""); 
   const backpack = ref(""); 
@@ -21,8 +25,12 @@ export const useMainStore = defineStore('main', () => {
   const completedOverlay = ref(false);
   const loadingStatus = ref(true);
 
+  const useCustomPlaceholder = ref(false);
   const placeholder = ref("");
+
   const defaultText = ref("");
+  
+  const useCharactersLimit = ref(false);
   const maxCharAllowed = ref(0);
 
   const endpoint = ref(false);
@@ -104,17 +112,39 @@ export const useMainStore = defineStore('main', () => {
       localeDict.value = projectProfile.value["locale"]
       endpoint.value = projectProfile.value["activities"][`${localConfigs.value["excerciceId"]}`]["isEndpoint"];
       
-      // placeholder.value = localeDict.value["placeholder"];
-      // placeholder.value = projectProfile.value["activities"][`${localConfigs.value["excerciceId"]}`]["placeholder"];
-      
-      defaultText.value = projectProfile.value["activities"][`${localConfigs.value["excerciceId"]}`]["defaultText"];
-      maxCharAllowed.value = projectProfile.value["activities"][`${localConfigs.value["excerciceId"]}`]["maxCharAllowed"];
+      // Get the html value of the default text
+      // Since its html string, make sure to sanitize it
+      const dirtyDefaultText = projectProfile.value["activities"][`${localConfigs.value["excerciceId"]}`]["defaultText"];
+
+      // Sanitize the default text, and assign it to the defaultText ref
+      defaultText.value = DOMPurify.sanitize(dirtyDefaultText, {FORBID_TAGS: ['img']});
+
+      // References:
+      // could also use this to define allowed tags: {ALLOWED_TAGS: ['p', 'strong']}
+
+      // Check if the exercice have a custom placeholder value
+      useCustomPlaceholder.value = projectProfile.value["activities"][`${localConfigs.value["excerciceId"]}`]["useCustomPlaceholder"];
+
+      // Get the custom placeholder value
+      placeholder.value = projectProfile.value["activities"][`${localConfigs.value["excerciceId"]}`]["placeholder"];
+
+      // Check if the exercice have a maxCharAllowed value
+      useCharactersLimit.value = projectProfile.value["activities"][`${localConfigs.value["excerciceId"]}`]["useCharactersLimit"];
+
+      // Get the maxCharAllowed value
+      maxCharAllowed.value = projectProfile.value["activities"][`${localConfigs.value["excerciceId"]}`]["maxCharactersAllowed"];
     }
   };
 
 // Pinia store method to get answers from Firebase RTDB
 const GetAnswerFromDatabase = async () => {
   if (!apiLiveStatus.value) return;
+
+  if (remoteConfigs.value.maintenanceMode == true) {
+    loadingStatus.value = false;
+    unitIsReady.value = true;
+    return
+  };
 
   // Set the status message
   statusMessage.value = statusStore.status[statusStore.locale].getAnswer;
@@ -141,15 +171,23 @@ const GetAnswerFromDatabase = async () => {
   }
 
   // Hide the loading indicator
-  loadingStatus.value = false;
-
+  if (endpoint.value == false) {
+    loadingStatus.value = false;
+  }
+  
   // Define the placeholder here to avoid FOUC
-  placeholder.value = localeDict.value["placeholder"];
+  placeholder.value = localeDict.value["placeholder"]; 
+  if (useCustomPlaceholder.value) {
+    placeholder.value = projectProfile.value["activities"][`${localConfigs.value["excerciceId"]}`]["customPlaceholder"];
+  } else {
+    placeholder.value = localeDict.value["placeholder"];
+  }
 };
 
 
 const SaveAnswer = async () => {
   if (!apiLiveStatus.value) return;
+  if (remoteConfigs.value.maintenanceMode) return;
 
   // Set the status message
   statusMessage.value = statusStore.status[statusStore.locale].saveAnswer;
@@ -259,6 +297,10 @@ const ValidateUser = async (source) => {
     return { valid: false };
   }
 }; 
+
+  const RestoreDefaultText = () => {
+    answer.value = defaultText.value;
+  };
  
   return {
     isAppVisible,
@@ -276,12 +318,14 @@ const ValidateUser = async (source) => {
     placeholder,
     defaultText,
     maxCharAllowed,
+    useCharactersLimit,
     endpoint,
     coverLoaded,
     projectProfile,
     localConfigs,
     localeDict,
     statusMessage,
+    unitIsReady,
     PingApi,
     GetRemoteConfigs,
     GetAnswerFromDatabase,
@@ -289,6 +333,7 @@ const ValidateUser = async (source) => {
     GetProjectProfileFromDatabase,
     DownloadFilledPdf,
     ValidateUser,
+    RestoreDefaultText,
   };
 });
 

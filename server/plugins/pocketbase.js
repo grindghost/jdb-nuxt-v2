@@ -5,8 +5,12 @@ let isAuthenticated = false;
 // Initialize PocketBase client
 const pb = new PocketBase('https://jdb.pockethost.io/'); // Replace with your Pocketbase URL
 
+// globally disable auto cancellation
+pb.autoCancellation(false);
+
 async function ensureAuthenticated(origin) {
   
+  // Check if the admin is authenticated
   console.log('Checking auth status from :', `${origin}`);
 
   if (!pb.authStore.isValid || !isAuthenticated) {

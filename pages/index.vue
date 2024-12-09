@@ -7,210 +7,12 @@
       :class="`theme-${computedTheme}`"
   > 
       <!-- Overlays container-->
-      <div
-          class="overlays-container noselect"
-          v-if="store.loadingStatus  || store.completedOverlay || store.endpoint || store.remoteConfigs.maintenanceMode"
-      >  
-        <!-- 1) Loading overlay --> 
-        <Transition name="overlay">
-        <div 
-          class="loading-overlay"
-          v-if="store.loadingStatus"
-        >
-          <!-- Loading icons -->
-          <fa icon="fas fa-spinner" class="fa-pulse" id="icon-loading" />
-
-          <!-- Loading text -->
-          <p v-html="store.statusMessage"></p>
-        </div>
-        </Transition>
-
-        <!-- 2) Confirmation/revisit overlay -->
-        <Transition name="overlay">
-          <div
-            id="confirmation-revisit-overlay"
-            v-if="store.completedOverlay && !store.endpoint && !store.remoteConfigs.maintenanceMode"
-            :class="{ 'fade-enter-active': store.completedOverlay, 'fade-leave-active': !store.completedOverlay}"
-
-          >
-            <fa icon="fa-circle-check" class="fa-beat" id="icon-checkmark" />
-            <div style="padding: 0px 130px 0px 130px; color: white">
-              
-              <h1 style="text-align: center; margin-bottom: 20px; white-space: pre" v-html="store.localeDict.completedView.header">
-              </h1>
-
-              <h2
-                style="
-                  text-align: center;
-                  font-size: 21px;
-                  font-weight: 300;
-                  line-height: 140%;
-                  white-space: pre;
-                "
-                v-html="store.localeDict.completedView.body"
-                
-              >
-              </h2>
-            </div>
-            <div>
-              <button
-                id="btn-correct-answer"
-                style="margin-top: -30px"
-                @click="store.completedOverlay = !store.completedOverlay"
-              >
-              {{ store.localeDict.completedView.button }}
-              </button>
-            </div>
-          </div>
-        </Transition>
-
-        <!-- 3) Maintenance overlay -->
-        <Transition>
-          <div
-            id="maintenance-overlay"
-            v-if="store.remoteConfigs.maintenanceMode && !store.endpoint"
-          >
-            <fa
-              icon="fa-solid fa-laptop-code"
-              class="fa-beat"
-              id="icon-checkmark"
-            />
-            <div style="padding: 0px 130px 0px 130px; color: white">
-              <h1 style="text-align: center; margin-bottom: 20px; white-space: pre" v-html="store.localeDict.maintenanceView.header">
-              </h1>
-              <h2
-                style="
-                  text-align: center;
-                  font-size: 21px;
-                  font-weight: 300;
-                  line-height: 140%;
-                  white-space: pre;
-                "
-                v-html="store.localeDict.maintenanceView.body"
-              >
-              </h2>
-            </div>
-          </div>
-        </Transition>
-
-        <!-- 1) Endpoint overlay -->
-        <div
-          id="endpoint-overlay"
-          :class="store.loadingStatus == true ? 'transparent' : ''"
-          v-if="store.endpoint"
-          @click="store.DownloadFilledPdf()"
-        >
-          <div
-            style="
-              padding: 52px;
-              width: 370px;
-              color: white;
-              display: flex;
-              flex-direction: column;
-            "
-          >
-            <h1 style="text-align: left; margin-bottom: 24px; font-size: 34px; white-space: pre" v-html="store.localeDict.endpointView.header">
-            </h1>
-            <p
-              style="
-                text-align: left;
-                font-size: 18px;
-                font-weight: 300;
-                line-height: 140%;
-                white-space: pre;
-                margin-bottom: 16px;
-              "
-              v-html="store.localeDict.endpointView.body"
-            >
-            </p>
-            <p style="margin-top: 20px; line-height: 160%;">
-              <span class="text-accent">{{ store.projectProfile.pdfFilename }}</span>
-              <br />
-              <span style="font-size: 16px;"
-                >~{{ store.projectProfile.pdfFileSize }}</span
-              >
-            </p>
-            
-            <button
-              style="float: left; width: 160px; margin-top: 14px"
-              
-            >
-            {{ store.localeDict.endpointView.button }}
-            </button>
-          </div>
-          <div style="width: 80%; position: relative; margin-right: 50px">
-            <img
-              :src="store.projectProfile['pdfCoverImgUrl']"
-              :onload="setCoverLoaded"
-              alt=""
-              style="
-                max-width: 275px;
-                position: absolute;
-                z-index: 1;
-                left: 0;
-                right: 0;
-                top: 0;
-                bottom: 0;
-                margin: auto;
-              "
-            />
-            <fa
-              icon="fas fa-spinner"
-              class="fa-pulse"
-              id="icon-checkmark"
-              style="
-                max-width: 275px;
-                position: absolute;
-                left: 0;
-                right: 0;
-                top: 0;
-                bottom: 0;
-                margin: auto;
-                z-index: 2;
-              "
-              v-if="store.coverLoaded == false"
-            />
-            <img
-              src="/cover.png"
-              alt=""
-              style="
-                max-width: 275px;
-                position: absolute;
-                left: 0;
-                right: 0;
-                top: 0;
-                bottom: 0;
-                margin: auto;
-              "
-            />
-
-            <img
-              src="/left_hand.png"
-              alt=""
-              style="
-                width: 157px;
-                position: absolute;
-                bottom: -24px;
-                z-index: 3;
-                left: 3px;
-              "
-            />
-            <img
-              src="/right_hand.png"
-              alt=""
-              style="
-                width: 140px;
-                position: absolute;
-                bottom: -24px;
-                z-index: 3;
-                right: -15px;
-              "
-            />
-          </div>
-        </div>
-
+      <div class="overlays-container noselect" v-if="store.loadingStatus || store.completedOverlay || store.endpoint || store.remoteConfigs.maintenanceMode">  
+        <LoadingOverlay />
+        <ConfirmationRevisitOverlay />
+        <GlobalMaintenanceOverlay v-if="store.unitIsReady" />
+        <EndpointOverlay />
       </div>
-
 
       <!-- Activity container -->
       <div
@@ -224,17 +26,24 @@
         <div class="footer noselect">
 
           <div class="maxchar">
+            
             <span id="count">
               <strong>{{ answerLength }}</strong>
-              {{ store.maxCharAllowed == 'null' ? store.localeDict?.editorView?.charCount || "" : "" }}
+              {{ store.useCharactersLimit == true ? "" : store.localeDict?.editorView?.charCount || "" }}
             </span>
+            
             {{
-              store.maxCharAllowed != 'null'
-                ? "/" + store.maxCharAllowed + " " + (store.localeDict?.editorView?.charCount || "") + " " + (store.localeDict?.editorView?.allowedChar || "")
+              store.useCharactersLimit == true
+                ? " / " + store.maxCharAllowed + " " + (store.localeDict?.editorView?.charCount || "") + " " + (store.localeDict?.editorView?.allowedChar || "")
                 : ""
             }}
           </div>
 
+          <div class="options-container">
+            <span class="options" @click="store.RestoreDefaultText">
+              {{ store.localeDict?.editorView?.restoreDefaultText || "" }}
+            </span>
+          </div>
 
           <!-- Submit button -->
           <button 
@@ -278,28 +87,23 @@
     const checkIfEmpty = (html) => {
       const textContent = stripHtml(html).trim();
       answerLength.value = textContent.length;
-
       return textContent.length === 0;
     };
 
     const computedTheme = computed(() => {
-    if (
-      store.projectProfile.theme == "brio" ||
-      store.projectProfile.theme == "ul-yellow" ||
-      store.projectProfile.theme == "ul-red"
-    ) {
-      
-      // return the actual theme
-      return store.projectProfile.theme;
-      
-    } else {
+      if (store.projectProfile.useCustomTheme == false) {
+        if (store.projectProfile.theme == "brio" || store.projectProfile.theme == "ul-yellow" || store.projectProfile.theme == "ul-red") {
+          // return the actual theme
+          return store.projectProfile.theme;  
+        } 
+      } else {
       // Return the default theme, with accent color
       const root = document.documentElement;
-      root.style.setProperty("--color-theme", store.projectProfile.theme);
-      root.style.setProperty("--color-theme-light", store.projectProfile.theme);
-      root.style.setProperty("--color-theme-accent", store.projectProfile.theme);
-      root.style.setProperty("--color-theme-button", store.projectProfile.theme);
-      root.style.setProperty("--color-theme-button-hover", store.projectProfile.theme);
+      root.style.setProperty("--color-theme", store.projectProfile.customTheme);
+      root.style.setProperty("--color-theme-light", store.projectProfile.customTheme);
+      root.style.setProperty("--color-theme-accent", store.projectProfile.customTheme);
+      root.style.setProperty("--color-theme-button", store.projectProfile.customTheme);
+      root.style.setProperty("--color-theme-button-hover", store.projectProfile.customTheme);
       return "default";
     }
   });
@@ -323,17 +127,18 @@
     statusStore.locale = lang;
   }
 
-  // Step 1: Validate referrer (only on the client side)
+  // Step 2: Validate referrer (only on the client side)
   if (process.client && process.env.NODE_ENV === 'production' ) {
     
+    // Get the status message from the local store
     store.statusMessage = statusStore.status[lang].referrerValidation;
     
     const referrer = document.referrer || "";
-    console.log('Referrer:', referrer);
+    // console.log('Referrer:', referrer);
 
     const isAllowedReferrer = config.public.allowedReferrerDomains.some(domain =>
           referrer.startsWith(domain)
-        );
+   );
 
     if (!isAllowedReferrer) {
       // console.error('Invalid referrer:', referrer);
@@ -355,7 +160,7 @@
       return;
     }
 
-  // Step 2: Retrieve token using URLSearchParams
+  // Step 3: Retrieve token using URLSearchParams
   store.statusMessage = statusStore.status[lang].getToken;
   const token = queryParams.get('token');
 
@@ -368,7 +173,7 @@
   }
 
   try {
-    // Step 3: Validate and decrypt the token with the server
+    // Step 4: Validate and decrypt the token with the server
     store.statusMessage = statusStore.status[lang].decodeToken;
     const decryptedPayload = await $fetch('/api/validateToken', {
       method: 'GET',
@@ -378,7 +183,7 @@
     const decryptedPayloadJson = JSON.parse(decryptedPayload);
     const { source, project, exercice } = decryptedPayloadJson;
 
-    // Step 4: Validate decrypted parameters
+    // Step 5: Validate decrypted parameters
     if (!source || source !== config.public.allowedSource || !project || !exercice) {
       document.body.innerHTML = "🔓 Invalid or missing parameters in the token."; // Lock emoji for invalid parameters
       store.loadingStatus = false;
@@ -386,7 +191,7 @@
       return;
     }
 
-    // Step 5: Validate the user with the backend
+    // Step 6: Validate the user with the backend
     store.statusMessage = statusStore.status[lang].loginUser;
     const response = await store.ValidateUser(source);
     if (!response || !response.valid) {
@@ -396,16 +201,16 @@
       return;
     }
 
-    // Step 6: Store relevant data in the Pinia store
+    // Step 7: Store relevant data in the Pinia store
     store.localConfigs["projectId"] = project;
     store.localConfigs["excerciceId"] = exercice;
 
-    // Step 7: Fetch additional data from the backend
+    // Step 8: Fetch additional data from the backend
     await store.GetRemoteConfigs();
     await store.GetProjectProfileFromDatabase();
     await store.GetAnswerFromDatabase();
-
-    // Step 8: Track the session start time (client-side only)
+   
+    // Step 9: Track the session start time (client-side only)
     store.startTime = performance.now();
     console.log('Session start time tracked.');
 
@@ -421,12 +226,6 @@
     watch(() => store.answer, (newAnswer) => {
         isAnswerEmpty.value = checkIfEmpty(newAnswer);
     });
-
-    // Other helpers
-    function setCoverLoaded() {
-      store.coverLoaded = true;
-    }
- 
   </script>
   
   <style scoped>

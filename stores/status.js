@@ -12,6 +12,8 @@ export const useStatusStore = defineStore('status', () => {
            "getRemoteConfigs" : "Requesting remote configs...",
            "getProjectProfile": "Requesting project profile...",
            "getAnswer" : "Retrieving previous answer...",
+           "loadCover" : "Retrieving PDF Cover...",
+
            "saveAnswer" : "Saving your answer...",
            "downloadPDF" : "Preparing your PDF...",
            "loading" : "Loading...",
@@ -28,6 +30,8 @@ export const useStatusStore = defineStore('status', () => {
             "getRemoteConfigs" : "Récupération des configurations à distance...",
             "getProjectProfile": "Récupération du profil de projet...",
             "getAnswer" : "Récupération de la réponse précédente...",
+            "loadCover" : "Récupération de la couverture...",
+            
             "saveAnswer" : "Enregistrement de votre réponse...",
             "downloadPDF" : "Préparation de votre PDF...",
             "loading" : "Chargement...",
