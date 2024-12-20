@@ -134,7 +134,6 @@
     store.statusMessage = statusStore.status[lang].referrerValidation;
     
     const referrer = document.referrer || "";
-    // console.log('Referrer:', referrer);
 
     const isAllowedReferrer = config.public.allowedReferrerDomains.some(domain =>
           referrer.startsWith(domain)

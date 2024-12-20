@@ -20,7 +20,7 @@ export default defineNuxtConfig({
     routeRules: {
       '/**': {
         headers: {
-          'Content-Security-Policy': "frame-ancestors 'self' https://www.brioeducation.ca https://pr.cloudfront.brioeducation.ca http://localhost:3000",
+          'Content-Security-Policy': "frame-ancestors 'self' https://www.brioeducation.ca https://pr.cloudfront.brioeducation.ca http://localhost:3000", // which domains are allowed to load the page inside an iframe
         }
       }
     }

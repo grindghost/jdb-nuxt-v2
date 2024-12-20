@@ -219,8 +219,10 @@ const SaveAnswer = async () => {
 
       completedOverlay.value = true;
       mode.value = "edition";
-      startTime.value = performance.now();
-      endTime.value = 0;
+      startTime.value = perfor
+      
+      // Send the message to the parent window to close
+      closeWindow();
 
     }, 1000);
 
@@ -301,6 +303,24 @@ const ValidateUser = async (source) => {
   const RestoreDefaultText = () => {
     answer.value = defaultText.value;
   };
+
+
+  const closeWindow = () => {
+    // Check if the current window has a parent frame
+    if (window.parent !== window) {
+      // Send a message to the parent frame
+      window.parent.postMessage(
+        {
+          action: 'closeWindow',
+          source: 'jdb' // Optional identifier for the message
+        },
+        '*' // Replace '*' with the parent frame's origin for security
+      );
+    } else {
+      console.warn('No parent frame detected. This window cannot send a message to a parent.');
+    }
+  }
+
  
   return {
     isAppVisible,
