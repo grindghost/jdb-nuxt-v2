@@ -219,8 +219,9 @@ const SaveAnswer = async () => {
 
       completedOverlay.value = true;
       mode.value = "edition";
-      startTime.value = perfor
-      
+      startTime.value = performance.now();
+      endTime.value = 0;
+
       // Send the message to the parent window to close
       closeWindow();
 
