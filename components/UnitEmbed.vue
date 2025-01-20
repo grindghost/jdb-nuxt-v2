@@ -15,10 +15,14 @@
     const answerLength = ref(0);
 
     const stripHtml = (html) => {
-      const div = document.createElement('div');
-      div.innerHTML = html;
-      return div.textContent || div.innerText || '';
+      if (process.client) {
+        const div = document.createElement('div');
+        div.innerHTML = html;
+        return div.textContent || div.innerText || '';
+      }
+      return ''; // Return empty string during SSR
     };
+
 
     const checkIfEmpty = (html) => {
       const textContent = stripHtml(html).trim();
@@ -26,11 +30,12 @@
       return textContent.length === 0;
     };
 
+    /*
     const computedTheme = computed(() => { 
         
-        const useCustomTheme = store.unitProfile?.project?.profile.useCustomTheme;
-        const customTheme = store.unitProfile?.project?.profile.customTheme;
-        const theme = store.unitProfile?.project?.profile.theme;
+        const useCustomTheme = store.unitProfile?.project?.profile?.useCustomTheme;
+        const customTheme = store.unitProfile?.project?.profile?.customTheme;
+        const theme = store.unitProfile?.project?.profile?.theme;
 
       if (useCustomTheme == false) {
         if (theme == "brio" || theme == "ul-yellow" || theme == "ul-red") {
@@ -39,7 +44,6 @@
         } 
       } else {
       // Return the default theme, with accent color
-      console.log('theme')
     // const root = document.documentElement;
         
     // root.style.setProperty("--color-theme", customTheme);
@@ -49,13 +53,14 @@
     // root.style.setProperty("--color-theme-button-hover", customTheme);  
     // return "default";
 
-      applyCustomTheme(customTheme);
-      return "custom"
+    applyCustomTheme(customTheme);
+    return "custom"
+
     }
   });
-
+    */
   // ****************************************;
-
+    /*
   const applyCustomTheme = (customTheme) => {
   // Define the styles dynamically using the custom theme
   const styleContent = `
@@ -76,16 +81,71 @@
   `;
 
   // Create a new style element
-  let styleElement = document.getElementById("custom-theme-style");
-  if (!styleElement) {
+  let styleElement = null;
+    try {
+      styleElement = document.getElementById("custom-theme-style");     
+    } catch (error) {
+      // ...
+    }
+  if (styleElement == null) {
+
     styleElement = document.createElement("style");
     styleElement.id = "custom-theme-style";
     document.head.appendChild(styleElement);
+    // Set the style content
+    styleElement.innerHTML = styleContent;
   }
 
-  // Set the style content
-  styleElement.innerHTML = styleContent;
+
 };
+
+*/
+
+const computedTheme = computed(() => {
+  const useCustomTheme = store.unitProfile?.project?.profile?.useCustomTheme;
+  const customTheme = store.unitProfile?.project?.profile?.customTheme;
+  const theme = store.unitProfile?.project?.profile?.theme;
+
+  if (!useCustomTheme) {
+    if (theme === "brio" || theme === "ul-yellow" || theme === "ul-red") {
+      return theme;
+    }
+  } else {
+    if (process.client) {
+      applyCustomTheme(customTheme);
+    }
+    return "custom";
+  }
+});
+
+const applyCustomTheme = (customTheme) => {
+  if (process.client) {
+    
+    const styleContent = `
+      .theme-custom {
+        --color-theme: ${customTheme};
+        --color-theme-light: ${customTheme};
+        --color-theme-white: #fff;
+        --color-theme-accent: ${customTheme};
+        --color-theme-button: ${customTheme};
+        --color-theme-button-hover: ${customTheme};
+        --color-theme-button-disabled: #d1d7d8;
+        --color-theme-textarea-bg: #F8F9FA;
+        --color-theme-container-gradient: linear-gradient(0deg, rgba(228, 233, 234, 1) 65%, rgba(255,255,255,1) 100%);
+        --color-theme-overlays-gradient: linear-gradient(0deg, rgba(41, 40, 40, 0.85) 0%, rgba(0, 0, 0, 0.7) 70%, rgba(1, 1, 1, 0.59) 100%);
+      }
+    `;
+
+    let styleElement = document.getElementById("custom-theme-style");
+    if (!styleElement) {
+      styleElement = document.createElement("style");
+      styleElement.id = "custom-theme-style";
+      document.head.appendChild(styleElement);
+    }
+    styleElement.innerHTML = styleContent;
+  }
+};
+
 
   // ****************************************
 
