@@ -1,12 +1,7 @@
 <script setup>
-
-    import { set } from '~/node_modules/nuxt/dist/app/compat/capi';
-import CompletedOverlay from './CompletedOverlay.vue';
-    import OverlayLoading from './OverlayLoading.vue';
-    import OverlayMaintenance from './OverlayMaintenance.vue';
-    import QuillEditor2 from './QuillEditor2.vue';
     
     import { useAppStateStore } from '/stores/appState';
+    
     const store = useAppStateStore();
 
     const props = defineProps({
@@ -182,7 +177,7 @@ const handleRestoreDefaultText = () => {
             <!-- Submit button -->
             <button 
                 @click="handleSubmit" 
-                :disabled="!store.enableEditor"
+                :disabled="!store.enableEditor || isAnswerEmpty"
             >
                 {{ store.mode === "edition" 
                     ? store.unitProfile?.locale?.editorView?.buttons?.correct || "..." 

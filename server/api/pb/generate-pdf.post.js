@@ -17,7 +17,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const backpackId = getCookie(event, 'backpackId'); // Get backpackId from the cookie
-  const { projectId, projectProfile, remoteConfigs } = await readBody(event); // Read POST body
+  const { token } = await readBody(event); // Read POST body
 
   await ensureAuthenticated("Generate PDF"); // Ensure authentication before each request
 
@@ -39,6 +39,15 @@ export default defineEventHandler(async (event) => {
 
       });
     }
+
+    // Decrypt the token
+    const decryptedPayload = await decryptContent(token);
+    console.log('Decrypted payload:', decryptedPayload);
+    const decryptedPayloadJson = JSON.parse(decryptedPayload);
+    const { source, project, exercice } = decryptedPayloadJson;
+
+    const projectId = project;
+    const activityId = exercice;
 
     // Query the history collection for all events related to the project
     let allEvents = [];
@@ -89,7 +98,13 @@ export default defineEventHandler(async (event) => {
     }
 
     // Load the PDF form (from URL or local file)
-    const pdfUrl = projectProfile.pdfURL; // URL or file path to the PDF form
+    // Get the project from the `Projects` collection
+    const currentProject = await pb.collection('Projects').getFirstListItem(`id = '${projectId}'`);
+    console.log('Current project:', currentProject.profile.pdfURL);
+
+    const pdfUrl = currentProject.profile.pdfURL;
+
+    // const pdfUrl = projectProfile.pdfURL; // URL or file path to the PDF form
     const response = await fetch(pdfUrl);
     const pdfBytes = await response.arrayBuffer();
 
@@ -116,7 +131,7 @@ export default defineEventHandler(async (event) => {
 
     // Set response headers and return the PDF as a binary response
     event.res.setHeader('Content-Type', 'application/pdf');
-    event.res.setHeader('Content-Disposition', `attachment; filename=${projectProfile.pdfFilename}.pdf`);
+    // event.res.setHeader('Content-Disposition', `attachment; filename=${currentProject.profile.pdfFilename}.pdf`);
     return new Uint8Array(filledPdfBytes); // Return binary data
 
   } catch (error) {

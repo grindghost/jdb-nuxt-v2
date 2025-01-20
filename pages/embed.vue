@@ -41,8 +41,8 @@
                 "activityTitle": "Exercice 1",
                 "contextText": "<p></p>",
                 "customPlaceholder": "...",
-                "defaultText": "<p></p>",
-                "isEndpoint": false,
+                "defaultText": "<p>Default text...</p>",
+                "isEndpoint": true,
                 "maxCharactersAllowed": 1000,
                 "token": "U2FsdGVkX19V6ijt6Qvi7ZPkpc9h44HR3CIIdxmJ/1nvAHpWzgswKlRFOrTWeTcXgO4Mqcpe0hK/cgx22UWM84mb+vhtqWnQ4QWRvx9B3O/7uOAoeNZD0+ezhimNzoiD5m74niJv0U7KRNLAJJK9bQ==",
                 "useCharactersLimit": true,
@@ -138,8 +138,8 @@
         }
         
         // Logic to assign, of remotly retrieve the unit profile (from db)
-        // profile.value = await store.GetUnitProfile(token, lang); 
-        profile.value = objTest;
+        profile.value = await store.GetUnitProfile(token, lang); 
+        // profile.value = objTest;
         
         await store.SetUnitStateOnArrival(profile.value);
     });

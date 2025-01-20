@@ -6,11 +6,13 @@ import { validateOrCreateUser, decryptContent } from '~/server/utils/authPB'; //
 import sanitizeHtml from 'sanitize-html';
 
 export default defineEventHandler(async (event) => {
+  // Get the backpackId from cookies
+  const backpackId = getCookie(event, 'backpackId'); 
 
-  const backpackId = getCookie(event, 'backpackId'); // Get the backpackId from cookies
-  const token = getQuery(event).token; // Get the path from query params
-
+  // Get the token from query params
+  const token = getQuery(event).token; 
   console.log('Token received from the query:', token);
+
   await ensureAuthenticated("Get answer"); // Ensure authentication before each request
 
   try {
@@ -31,7 +33,6 @@ export default defineEventHandler(async (event) => {
         secure: true,
         sameSite: process.env.SAME_SITE,
         maxAge: 60 * 60 * 24 * 365 * 10, // 10 years in seconds (permanent)
-
       });
     }
 

@@ -3,7 +3,6 @@ import { decryptContent } from '~/server/utils/authPB';
 import { useRuntimeConfig } from '#imports';
 
 export default defineEventHandler(async (event) => {
-  const config = useRuntimeConfig(); // Access SECRET_KEY from runtime config
 
   const query = getQuery(event);
   const token = query.token;

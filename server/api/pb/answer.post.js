@@ -1,11 +1,13 @@
 import { getCookie, setCookie, readBody } from 'h3';
-import { pb, ensureAuthenticated } from '~/server/plugins/pocketbase'; // Import Pocketbase instance directly
-import { encryptContent, validateOrCreateUser } from '~/server/utils/authPB';
-import sanitizeHtml from 'sanitize-html'; // Import sanitize-html for sanitization
+import { pb, ensureAuthenticated } from '~/server/plugins/pocketbase';
+import { encryptContent, decryptContent, validateOrCreateUser } from '~/server/utils/authPB';
+import sanitizeHtml from 'sanitize-html'; 
 
 export default defineEventHandler(async (event) => {
   const backpackId = getCookie(event, 'backpackId'); // Get the backpackId from cookies
-  const { path, data, date, timeElapsed } = await readBody(event); // Get the request body using readBody
+  const { token, data, date, timeElapsed } = await readBody(event); // Get the request body using readBody
+
+  console.log('Token received from the query:', token);
 
   await ensureAuthenticated("Save answer"); // Ensure authentication before each request
 
@@ -27,6 +29,15 @@ export default defineEventHandler(async (event) => {
       });
     }
 
+    // Decrypt the token
+    const decryptedPayload = await decryptContent(token);
+    console.log('Decrypted payload:', decryptedPayload);
+    const decryptedPayloadJson = JSON.parse(decryptedPayload);
+    const { source, project, exercice } = decryptedPayloadJson;
+
+    const projectId = project;
+    const activityId = exercice;
+
     // Step 3: Sanitize and encrypt the content
     const sanitizedData = sanitizeHtml(data, {
       allowedTags: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'span', 'br', 'ul', 'ol', 'li', 'b', 'i', 'u', 'strike', 'em', 'strong', 's'],
@@ -36,6 +47,7 @@ export default defineEventHandler(async (event) => {
       }
     });
     
+    // Encrypt the answer
     const encryptedAnswer = await encryptContent(sanitizedData);
 
     // Step 4: Save the new historic event in Pocketbase
@@ -43,8 +55,8 @@ export default defineEventHandler(async (event) => {
     
     const historicEvent = {
       backpackId: decryptedbackpackId,
-      courseId: path.split('/')[0],  // Assuming path contains courseId/activityId structure
-      activityId: path.split('/')[1], // Extract activityId from path
+      courseId: projectId,  
+      activityId: activityId, 
       answer: encryptedAnswer,
       date: timestamp,
       timeElapsed: timeElapsed || 0,
@@ -55,7 +67,7 @@ export default defineEventHandler(async (event) => {
 
     // Step 5: Fetch the last 3 historic events and delete older ones
     const existingEvents = await pb.collection('History').getFullList(200, {
-      filter: `backpackId = '${decryptedbackpackId}' && courseId = '${path.split('/')[0]}' && activityId = '${path.split('/')[1]}'`,
+      filter: `backpackId = '${decryptedbackpackId}' && courseId = '${projectId}' && activityId = '${activityId}'`,
       sort: '-date', // Sort by date (newest first)
     });
 

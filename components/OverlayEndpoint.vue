@@ -54,8 +54,7 @@
     const { pdfCoverImgUrl, pdfFilename, pdfFileSize } = appStore.unitProfile.project.profile;
 
   const handleClick = () => {
-      // store.downloadFilledPdf();
-      console.log('Endpoint overlay clicked');
+      appStore.downloadFilledPdf();
   }
   
   function setCoverLoaded() {

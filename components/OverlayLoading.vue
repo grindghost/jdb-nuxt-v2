@@ -10,15 +10,13 @@
   <script setup>
 
     import { useAppStateStore } from '/stores/appState';
-    import { useStatusStore } from '/stores/status';
     
     const appStore = useAppStateStore();
-    const statusStore = useStatusStore();
 
     // Compute the status message
     const statusMessage = computed (() => {
-      const status = statusStore.status[appStore.lang][appStore.statusMessage];
-      return status;
+      return appStore.statusMessage;
     });
+
 
   </script>
