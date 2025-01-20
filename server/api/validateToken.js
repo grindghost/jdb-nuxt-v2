@@ -17,7 +17,6 @@ export default defineEventHandler(async (event) => {
   try {
     const decodedToken = token;
     const decryptedPayload = await decryptContent(decodedToken);
-
     return decryptedPayload; // Send decrypted data back to client
   } catch (error) {
     console.error("Token decryption failed:", error);

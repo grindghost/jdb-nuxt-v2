@@ -66,7 +66,7 @@ export const useAppStateStore = defineStore('app', () => {
       const response = await fetch(`/api${endpoint}`, {
         method,
         credentials: 'include',
-        headers: { 'Content-Type': 'application/json', UserId: 'hello' },
+        headers: { 'Content-Type': 'application/json'},
         body: body ? JSON.stringify(body) : null
       });
       if (!response.ok) throw new Error('API error');

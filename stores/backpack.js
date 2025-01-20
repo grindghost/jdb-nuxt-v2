@@ -2,9 +2,7 @@ import { defineStore } from 'pinia';
 import DOMPurify from 'dompurify';
 import Bowser from "bowser"; // To detect browser... (especially for Firefox)
 import { useStatusStore } from '/stores/status';
-import { RemovePageFromEmptyDocumentError } from 'pdf-lib';
-import { load } from 'cheerio';
-import { faHouseMedicalCircleExclamation } from '@fortawesome/free-solid-svg-icons/faHouseMedicalCircleExclamation';
+
 
 export const useMainStore = defineStore('main', () => {
   

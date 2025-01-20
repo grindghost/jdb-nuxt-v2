@@ -153,7 +153,7 @@ const handleRestoreDefaultText = () => {
     <div class="acitivity-container" :class="store.overlayVisible ? 'transparent' : ''">
 
         <!-- Quill editor -->
-        <QuillEditor2 v-model:content="store.editorContent" contentType="html" :placeholder="placeholder" />
+        <QuillEditor v-model:content="store.editorContent" contentType="html" :placeholder="placeholder" />
 
         <!-- Footer -->
         <div class="footer noselect">
