@@ -72,9 +72,9 @@
     const config = useRuntimeConfig();
 
     // Middleware to guard the access, and provide access
-    definePageMeta({
-      middleware: 'validate-access',
-    });
+    // definePageMeta({
+    //   middleware: 'validate-access',
+    // });
     
     const isAnswerEmpty = ref(true);
     const answerLength = ref(0);
