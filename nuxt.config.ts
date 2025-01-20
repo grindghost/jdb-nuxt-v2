@@ -3,7 +3,7 @@ export default defineNuxtConfig({
   compatibilityDate: '2024-04-03',
   devtools: { enabled: true },
   modules: ['@pinia/nuxt'],
-  plugins: ['@/plugins/fontawesome.js', '@/plugins/scaler.client.js'],
+  plugins: ['@/plugins/fontawesome.js'], // '@/plugins/scaler.client.js'
   typescript: { strict: false },
   css: [    
     'quill/dist/quill.snow.css',

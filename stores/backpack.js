@@ -4,10 +4,69 @@ import Bowser from "bowser"; // To detect browser... (especially for Firefox)
 import { useStatusStore } from '/stores/status';
 import { RemovePageFromEmptyDocumentError } from 'pdf-lib';
 import { load } from 'cheerio';
+import { faHouseMedicalCircleExclamation } from '@fortawesome/free-solid-svg-icons/faHouseMedicalCircleExclamation';
 
 export const useMainStore = defineStore('main', () => {
-
+  
   const statusStore = useStatusStore();
+  const isLoading = ref(false);
+  const isReady = ref(false);
+  
+  const UnitProfile = ref(null);
+
+  const UnitState = ref('overlay');
+
+
+  const SetUnitStateOnArrival = async() => {
+    console.log('SetUnitStateOnArrival');
+    if (UnitProfile.value === null) {
+      UnitState.value = 'overlay';
+      return;
+    }
+
+    else if (UnitProfile.value['configs']['maintenanceMode'] === true) {
+      UnitState.value = 'maintenance';
+      return;
+    }
+
+    else if (UnitProfile.value['project']['profile']['isEndpoint'] === true) {
+      UnitState.value = 'endpoint';
+      return;
+    }
+
+    else if (UnitProfile.value['history'] == null) {
+      UnitState.value = 'completed';
+      return;
+    }
+
+  };
+
+
+  const GetUnitProfile = async (token, lang) => {
+
+    // Assign the local lang (for the status message) from the token
+    // ... or statusStore.locale = lang;/
+
+    // Start the loading status
+    isLoading.value = true;
+
+    UnitProfile.value = await fetchFromApi(`/pb/profile?token=${encodeURIComponent(token)}`);
+
+    // Start the loading status
+    isLoading.value = false;
+
+    // The unit is ready
+    isReady.value = true;
+
+    await SetUnitStateOnArrival();
+
+    // Retur the Unit Profile
+    return UnitProfile.value;
+  };
+
+  // ****************************************
+
+  
   const isAppVisible = ref(false); // Default to false
 
   const unitIsReady = ref(false);
@@ -49,7 +108,7 @@ export const useMainStore = defineStore('main', () => {
       const response = await fetch(`/api${endpoint}`, {
         method,
         credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', UserId: 'hello' },
         body: body ? JSON.stringify(body) : null
       });
       if (!response.ok) throw new Error('API error');
@@ -347,6 +406,11 @@ const ValidateUser = async (source) => {
     localeDict,
     statusMessage,
     unitIsReady,
+
+    isLoading,
+    UnitState,
+    GetUnitProfile,
+
     PingApi,
     GetRemoteConfigs,
     GetAnswerFromDatabase,

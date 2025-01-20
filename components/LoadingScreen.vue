@@ -1,17 +1,15 @@
 <template>
     <Transition name="overlay">
-      <div class="loading-overlay" v-if="store.loadingStatus">
-        <fa icon="fas fa-spinner" class="fa-pulse" id="icon-loading" />
+      <div class="loading-overlay" v-if="store.isLoading">
+        <!-- <fa icon="fas fa-spinner" class="fa-pulse" id="icon-loading" /> -->
         <p v-html="store.statusMessage"></p>
       </div>
     </Transition>
   </template>
   
   <script setup>
-  import { useMainStore } from '/stores/backpack';
-  const store = useMainStore();
-  console.log(store.isLoading.value)
-
+    import { useMainStore } from '/stores/backpack';
+    const store = useMainStore();
   </script>
   
   <style scoped>

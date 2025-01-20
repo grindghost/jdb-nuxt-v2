@@ -65,6 +65,7 @@
   <script setup>
     import { useMainStore } from '/stores/backpack';
     import { useStatusStore } from '/stores/status';
+    import { initializeScaler } from '~/utils/scaler';
 
     const store = useMainStore();
     const statusStore = useStatusStore();
@@ -109,6 +110,8 @@
   });
 
   onMounted(async () => {
+
+    initializeScaler();
     
   // Add a small delay to allow cookies to be restored after sleep
   // await new Promise(resolve => setTimeout(resolve, 500));
