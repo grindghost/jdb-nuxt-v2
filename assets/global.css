@@ -1,7 +1,6 @@
 /* Overpass */
 @import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Inter:wght@100..900&family=Overpass:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Source+Sans+3:ital,wght@0,200..900;1,200..900&display=swap');
 
-
 * {
     box-sizing: border-box;
     margin: 0;
@@ -97,10 +96,12 @@ html {
     background: rgb(235, 239, 241);
     background: linear-gradient(180deg, rgba(235, 239, 241, 1) 44%, rgba(198, 204, 205, 1) 82%);  
     width: 100%;
-    height: 100vh;
+    height: 100%;
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
     justify-content: center;
+    padding: 1rem;
   }
 
   .acitivity-container {
@@ -115,7 +116,8 @@ html {
     box-shadow: 0 0 2px 1px rgba(0,0,0,.17);
     background-color: white;
     width: 100%;
-    height: 100%;
+    height: 70%;
+    min-height: 70vh;
     max-width: 796px;
     max-height: 446px;
     margin: auto;
@@ -212,7 +214,7 @@ html {
 
 
   .bottom-gradient {
-    background: rgb(255,255,255);
+    background: rgb(209, 61, 61);
     background: linear-gradient(0deg, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%);
     position: absolute;
     bottom: 0;
@@ -233,6 +235,17 @@ html {
     justify-content: space-between;
 }
 
+.footer-portal {
+  width: 100%;
+  height: 95px;
+  padding: 0 30px;
+  background-color: #f4f6f8;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
 .options-container {
   display: flex;
   flex-grow: 1;
@@ -248,6 +261,19 @@ html {
 }
 
 .footer div .options:hover {
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 600;
+  transform: scale(1.1);
+}
+
+.footer-portal .options {
+  font-size: 0.8rem;
+  color: #ccc;
+  transition: ease-in-out 0.15s;
+}
+
+.footer-portal div .options:hover {
   cursor: pointer;
   font-size: 0.8rem;
   font-weight: 600;

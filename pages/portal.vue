@@ -1,252 +1,153 @@
 <template>
+    <!-- This is the embed unit component -->
+    <UnitPortal
+        :profile=profile 
+    />
   
-    <!-- Main container -->
-    <div
-        v-if="store.isAppVisible"
-        class="wrapper-portal"
-        :class="`theme-${computedTheme}`"
-    > 
-        <!-- Overlays container-->
-        <div class="overlays-container noselect" v-if="store.loadingStatus || store.completedOverlay || store.endpoint || store.remoteConfigs.maintenanceMode">  
-          <LoadingOverlay />
-          <ConfirmationRevisitOverlay />
-          <GlobalMaintenanceOverlay v-if="store.unitIsReady" />
-          <EndpointOverlay />
-        </div>
-  
-        <!-- Activity container -->
-        <div
-          class="acitivity-container-portal"
-          :class="store.completedOverlay == true || store.endpoint == true || store.remoteConfigs.maintenanceMode == true || store.loadingStatus == true ? 'transparent' : ''">
-          
-          <!-- Quill editor -->
-          <QuillEditor v-model:content="store.answer" contentType="html" :placeholder="store.placeholder" />
-          
-          <!-- Footer -->
-          <div class="footer noselect">
-  
-            <div class="maxchar">
-              
-              <span id="count">
-                <strong>{{ answerLength }}</strong>
-                {{ store.useCharactersLimit == true ? "" : store.localeDict?.editorView?.charCount || "" }}
-              </span>
-              
-              {{
-                store.useCharactersLimit == true
-                  ? " / " + store.maxCharAllowed + " " + (store.localeDict?.editorView?.charCount || "") + " " + (store.localeDict?.editorView?.allowedChar || "")
-                  : ""
-              }}
-            </div>
-  
-            <div class="options-container">
-              <span class="options" @click="store.RestoreDefaultText">
-                {{ store.localeDict?.editorView?.restoreDefaultText || "" }}
-              </span>
-            </div>
-  
-            <!-- Submit button -->
-            <button 
-                @click="store.SaveAnswer" 
-                :disabled="isAnswerEmpty || store.endpoint || store.completedOverlay || store.answer === store.defaultText"
-            >
-                {{ store.mode === "edition" 
-                    ? store.localeDict?.editorView?.buttons?.correct || "..." 
-                    : store.localeDict?.editorView?.buttons?.submit || "..." 
-                }}
-            </button>
-          </div>
-        </div>
-  
-      </div>
-  
-    </template>
-    
-    <script setup>
-      import { useMainStore } from '/stores/backpack';
-      import { useStatusStore } from '/stores/status';
-  
-      const store = useMainStore();
-      const statusStore = useStatusStore();
-      const config = useRuntimeConfig();
-  
-      // Middleware to guard the access, and provide access
-      definePageMeta({
-        middleware: 'validate-access',
-      });
-      
-      const isAnswerEmpty = ref(true);
-      const answerLength = ref(0);
-  
-      const stripHtml = (html) => {
-        const div = document.createElement('div');
-        div.innerHTML = html;
-        return div.textContent || div.innerText || '';
-      };
-  
-      const checkIfEmpty = (html) => {
-        const textContent = stripHtml(html).trim();
-        answerLength.value = textContent.length;
-        return textContent.length === 0;
-      };
-  
-      const computedTheme = computed(() => {
-        if (store.projectProfile.useCustomTheme == false) {
-          if (store.projectProfile.theme == "brio" || store.projectProfile.theme == "ul-yellow" || store.projectProfile.theme == "ul-red") {
-            // return the actual theme
-            return store.projectProfile.theme;  
-          } 
-        } else {
-        // Return the default theme, with accent color
-        const root = document.documentElement;
-        root.style.setProperty("--color-theme", store.projectProfile.customTheme);
-        root.style.setProperty("--color-theme-light", store.projectProfile.customTheme);
-        root.style.setProperty("--color-theme-accent", store.projectProfile.customTheme);
-        root.style.setProperty("--color-theme-button", store.projectProfile.customTheme);
-        root.style.setProperty("--color-theme-button-hover", store.projectProfile.customTheme);
-        return "default";
-      }
-    });
-  
-    onMounted(async () => {
-      
-    // Add a small delay to allow cookies to be restored after sleep
-    // await new Promise(resolve => setTimeout(resolve, 500));
-  
-    store.loadingStatus = true;
-    store.isAppVisible = true;
-  
-    // Step 1: Get the language from the query parameters
-    const queryParams = new URLSearchParams(window.location.search); 
-    const lang = queryParams.get('lang') || 'fr';
-  
-    if (lang !== 'fr' && lang !== 'en') {
-      console.error('Invalid language:', lang);
-      statusStore.locale = 'fr';
-    } else {
-      statusStore.locale = lang;
-    }
-  
-    // Step 2: Validate referrer (only on the client side)
-    if (process.client && process.env.NODE_ENV === 'production' ) {
-      
-      // Get the status message from the local store
-      store.statusMessage = statusStore.status[lang].referrerValidation;
-      
-      const referrer = document.referrer || "";
-  
-      const isAllowedReferrer = config.public.allowedReferrerDomains.some(domain =>
-            referrer.startsWith(domain)
-     );
-  
-      if (!isAllowedReferrer) {
-        // console.error('Invalid referrer:', referrer);
-        document.body.innerHTML = "🔓 Invalid referrer"; // Lock emoji for unauthorized access
-        store.loadingStatus = false;
-        store.isAppVisible = false; // Ensure app is not displayed
-        return;
-      }
-    }
-  
-      // Ping the API to check if it's live...
-      store.statusMessage = statusStore.status[lang].apiPing;
-  
-      const apiIsLive = await store.PingApi();
-      if (!apiIsLive) {
-        document.body.innerHTML = "🔓 API isn't live.";
-        store.loadingStatus = false;
-        store.isAppVisible = false; // Ensure app is not displayed
-        return;
-      }
-  
-    // Step 3: Retrieve token using URLSearchParams
-    store.statusMessage = statusStore.status[lang].getToken;
-    const token = queryParams.get('token');
-  
-    if (!token) {
-      // console.error('Missing access token.');
-      document.body.innerHTML = "🔓 Missing token"; // Lock emoji for missing token
-      store.loadingStatus = false;
-      store.isAppVisible = false; // Ensure app is not displayed
-      return;
-    }
-  
-    try {
-      // Step 4: Validate and decrypt the token with the server
-      store.statusMessage = statusStore.status[lang].decodeToken;
-      const decryptedPayload = await $fetch('/api/validateToken', {
-        method: 'GET',
-        params: { token },
-      });
-  
-      const decryptedPayloadJson = JSON.parse(decryptedPayload);
-      const { source, project, exercice } = decryptedPayloadJson;
-  
-      // Step 5: Validate decrypted parameters
-      if (!source || source !== config.public.allowedSource || !project || !exercice) {
-        document.body.innerHTML = "🔓 Invalid or missing parameters in the token."; // Lock emoji for invalid parameters
-        store.loadingStatus = false;
-        store.isAppVisible = false; // Ensure app is not displayed
-        return;
-      }
-  
-      // Step 6: Validate the user with the backend
-      store.statusMessage = statusStore.status[lang].loginUser;
-      const response = await store.ValidateUser(source);
-      if (!response || !response.valid) {
-        document.body.innerHTML = "🔓 User validation failed."; // Lock emoji for invalid user
-        store.loadingStatus = false;
-        store.isAppVisible = false;
-        return;
-      }
-  
-      // Step 7: Store relevant data in the Pinia store
-      store.localConfigs["projectId"] = project;
-      store.localConfigs["excerciceId"] = exercice;
-  
-      // Step 8: Fetch additional data from the backend
-      await store.GetRemoteConfigs();
-      await store.GetProjectProfileFromDatabase();
-      await store.GetAnswerFromDatabase();
-     
-      // Step 9: Track the session start time (client-side only)
-      store.startTime = performance.now();
-      console.log('Session start time tracked.');
-  
-    } catch (error) {
-      console.error('Token validation failed:', error);
-      document.body.innerHTML = "🔓 Invalid token"; // Lock emoji for token errors
-      store.loadingStatus = false;
-      store.isAppVisible = false; // Ensure app is not displayed
-    }
-  });
-  
-     // Watch the `answer` ref from the store and update `isAnswerEmpty`
-      watch(() => store.answer, (newAnswer) => {
-          isAnswerEmpty.value = checkIfEmpty(newAnswer);
-      });
-    </script>
-    
-    <style scoped>
+</template>
 
-    /* ... */
-    .fade-enter-active {
-      opacity: 0;
-      animation: fadeIn 0.5s forwards;
-      /* animation-delay: 1s; */
-    }
-  
-  @keyframes fadeIn {
-    0% {
-      opacity: 0;
-      transform: scale(0.5);
-    } 
-  
-    100% {
-      opacity: 1;
-      transform: scale(1);
-    } 
-  
-  }
-    </style>
+<script setup>
+    import { initializeScaler } from '~/utils/scaler';
+    import { useAppStateStore } from '/stores/appState';
+
+    const store = useAppStateStore();
+    const config = useRuntimeConfig();
+
+    const profile = ref({});
+
+    definePageMeta({
+        layout: false,
+    });
+
+    onMounted(async() => {
+        
+        // Object test
+        const objTest = {
+            "configs": {
+                "collectionId": "jjq7raxar3a1nu3",
+                "collectionName": "Configs",
+                "created": "2024-10-17 19:11:48.366Z",
+                "currentCollection": "Automne 2024",
+                "history": 3,
+                "id": "3znbpxwdnlhju0q",
+                "maintenanceMode": false,
+                "maxChar": 1000,
+                "name": "global",
+                "openInNewWindow": true,
+                "proxy": "https://ulavalcorsproxy.onrender.com/",
+                "updated": "2024-12-25 19:13:50.948Z"
+            },
+            "activity": {
+                "activityTitle": "Exercice 1",
+                "contextText": "<p></p>",
+                "customPlaceholder": "...",
+                "defaultText": "<p>Default text...</p>",
+                "isEndpoint": true,
+                "maxCharactersAllowed": 1000,
+                "token": "U2FsdGVkX19V6ijt6Qvi7ZPkpc9h44HR3CIIdxmJ/1nvAHpWzgswKlRFOrTWeTcXgO4Mqcpe0hK/cgx22UWM84mb+vhtqWnQ4QWRvx9B3O/7uOAoeNZD0+ezhimNzoiD5m74niJv0U7KRNLAJJK9bQ==",
+                "useCharactersLimit": true,
+                "useCustomPlaceholder": false
+            },
+            "project": {
+                "author": "xjopkfmhrnv9rlz",
+                "collectionId": "hgpz21hr6g5k9ua",
+                "collectionName": "Projects",
+                "created": "2025-01-17 17:00:27.705Z",
+                "id": "1cbqz4p4xhzv1bi",
+                "profile": {
+                    "author": "xjopkfmhrnv9rlz",
+                    "courseId": "L'apprentissage du savoir faire...",
+                    "customTheme": "#fcba03",
+                    "description": "RQ - Janvier",
+                    "expirationDate": null,
+                    "lang": "fr",
+                    "maintenanceMode": false,
+                    "name": "Module 5",
+                    "pdfCoverImgUrl": "https://jdb.pockethost.io/api/files/ch1qakk3faxo2cl/y9vgs67inbxwz6d/cover_image_NwRQdXJQOQ.png",
+                    "pdfFileSize": "1.52 MB",
+                    "pdfFilename": "Journal_de_bord-M5",
+                    "pdfURL": "https://jdb.pockethost.io/api/files/ch1qakk3faxo2cl/y9vgs67inbxwz6d/project_1737133225412_n4IJ3yIIO7.pdf?token=",
+                    "published": true,
+                    "theme": "brio",
+                    "useCustomTheme": false,
+                    "useExpirationDate": false
+                },
+                "updated": "2025-01-17 17:00:27.837Z"
+            },
+            "locale": {
+                "lang": "fr",
+                "placeholder": "Entrez votre réflexion ici...",
+                "editorView": {
+                    "buttons": {
+                        "submit": "Soumette",
+                        "correct": "Corriger"
+                    },
+                    "charCount": "caractères",
+                    "allowedChar": "permis",
+                    "toolbar": {
+                        "h1": "Niveau 1",
+                        "h2": "Niveau 2",
+                        "h3": "Niveau 3",
+                        "normal": "Paragraphe"
+                    },
+                    "restoreDefaultText": "Restorer le format"
+                },
+                "completedView": {
+                    "body": "Votre réponse sera compilée dans votre journal<br>de bord que vous pourrez télécharger au format<br>PDF à la fin de votre formation.",
+                    "button": "Corriger ma réponse",
+                    "header": "Vous avez bel et bien<br>complété cet exercice."
+                },
+                "endpointView": {
+                    "body": "Cliquez ici pour récupérer votre PDF<br>contenant toutes vos réponses.",
+                    "header": "Le journal de bord<br>de votre module<br>est prêt!",
+                    "button": "Télécharger"
+                },
+                "maintenanceView": {
+                    "header": "Maintenance en cours...",
+                    "body": "Nous devons temporairement restreindre l'accès<br/>aux zones de réflexions interactives, car nous effectuons <br/>des travaux de maintenance. Nous vous prions de nous<br/>excuser pour cette interruption..."
+                }
+            },
+            "history": 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua…',
+        }
+
+        
+        // Scaling logic, specific to this embedable page
+        // initializeScaler();
+
+        // Step 1: Get the query parameters
+        const queryParams = new URLSearchParams(window.location.search); 
+        
+        // Step 2: Get the token, and the language from the query parameters
+        const token = queryParams.get('token') || 'U2FsdGVkX19V6ijt6Qvi7ZPkpc9h44HR3CIIdxmJ/1nvAHpWzgswKlRFOrTWeTcXgO4Mqcpe0hK/cgx22UWM84mb+vhtqWnQ4QWRvx9B3O/7uOAoeNZD0+ezhimNzoiD5m74niJv0U7KRNLAJJK9bQ==';
+        
+        const lang = queryParams.get('lang') || 'fr';
+
+        // Step 3: Validate and decrypt the token with the server
+        const decryptedPayload = await $fetch('/api/validateToken', {
+            method: 'GET',
+            params: { token },
+        });
+
+        const decryptedPayloadJson = JSON.parse(decryptedPayload);
+        const { source, project, exercice } = decryptedPayloadJson;
+
+
+        if (!source || source !== config.public.allowedSource || !project || !exercice) {
+            document.body.innerHTML = "🔓 Invalid or missing parameters in the token.";  
+            return;
+        }
+        
+        // Logic to assign, of remotly retrieve the unit profile (from db)
+        profile.value = await store.GetUnitProfile(token, lang); 
+        // profile.value = objTest;
+        
+        await store.SetUnitStateOnArrival(profile.value);
+    });
+
+</script>
+
+
+
+
     
+ 

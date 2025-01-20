@@ -1,6 +1,6 @@
 <template>
     <div v-if="isClient" class="quill-container">
-      <div class="bottom-gradient"></div>
+      <!-- <div class="bottom-gradient"></div> -->
       <div ref="editorContainer" class="ql-container ql-snow"></div>
     </div>
   </template>
