@@ -144,7 +144,7 @@
 
     if (!isAllowedReferrer) {
       // console.error('Invalid referrer:', referrer);
-      document.body.innerHTML = "🔓 Invalid referrer (5)"; // Lock emoji for unauthorized access
+      document.body.innerHTML = "🔓 Invalid referrer (6)"; // Lock emoji for unauthorized access
       store.loadingStatus = false;
       store.isAppVisible = false; // Ensure app is not displayed
       return;
