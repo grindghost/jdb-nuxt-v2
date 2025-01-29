@@ -130,7 +130,7 @@
     statusStore.locale = lang;
   }
 
-  // Step 2: Validate referrer (only on the client side)
+  // Step 2: Validate referrer (only on the client side) 
   if (process.client && process.env.NODE_ENV === 'production' ) {
     
     // Get the status message from the local store

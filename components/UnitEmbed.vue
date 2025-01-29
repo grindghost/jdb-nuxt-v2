@@ -102,9 +102,16 @@
 */
 
 const computedTheme = computed(() => {
-  const useCustomTheme = store.unitProfile?.project?.profile?.useCustomTheme;
-  const customTheme = store.unitProfile?.project?.profile?.customTheme;
-  const theme = store.unitProfile?.project?.profile?.theme;
+  // const useCustomTheme = store.unitProfile?.project?.profile?.useCustomTheme;
+  const useCustomTheme = props.profile?.project?.profile?.useCustomTheme;
+  // const customTheme = store.unitProfile?.project?.profile?.customTheme;
+  const customTheme = props.profile?.project?.profile?.customTheme;
+  // const theme = store.unitProfile?.project?.profile?.theme;
+  const theme = props.profile?.project?.profile?.theme;
+
+  console.log("useCustomTheme", useCustomTheme);
+  console.log("customTheme", customTheme);
+  console.log("theme", theme);
 
   if (!useCustomTheme) {
     if (theme === "brio" || theme === "ul-yellow" || theme === "ul-red") {
@@ -114,6 +121,7 @@ const computedTheme = computed(() => {
     if (process.client) {
       applyCustomTheme(customTheme);
     }
+    console.log("custom theme");
     return "custom";
   }
 });
